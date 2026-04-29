@@ -4,7 +4,7 @@
 
 | Name | GitHub | Role |
 |------|--------|------|
-| Ayush Singh | [@ayush](https://github.com/ayush) | Creator, Second Brain Labs |
+| Ayush Singh | [@ayush488-glitch](https://github.com/ayush488-glitch) | Creator, Second Brain Labs |
 
 ## AI Co-authors
 

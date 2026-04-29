@@ -116,7 +116,7 @@ The SBL Stack skills call these tools from the `sbl-mcp` server:
 
 | Name | GitHub | Role |
 |------|--------|------|
-| Ayush Singh | [@ayush](https://github.com/ayush) | Creator, Second Brain Labs |
+| Ayush Singh | [@ayush488-glitch](https://github.com/ayush488-glitch) | Creator, Second Brain Labs |
 | Claude | Anthropic | Skill architecture, playbook distillation, MCP tooling |
 | Codex | OpenAI | Co-author |
 

@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# SBL Stack setup — installs skills and MCP server config into Claude Code
+set -e
+
+SKILLS_DIR="$HOME/.claude/skills/sbl"
+SETTINGS_FILE="$HOME/.claude/settings.json"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo ""
+echo "SBL Stack — Setup"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# ── 1. Install skills ────────────────────────────────────────────────────────
+
+echo "Installing skills to $SKILLS_DIR ..."
+mkdir -p "$SKILLS_DIR"
+
+for skill in sbl sbl-create sbl-optimize sbl-triage sbl-playbook sbl-retro; do
+  mkdir -p "$SKILLS_DIR/$skill"
+  cp "$SCRIPT_DIR/$skill/SKILL.md" "$SKILLS_DIR/$skill/SKILL.md"
+  echo "  ✅ $skill"
+done
+
+# Copy playbooks
+mkdir -p "$SKILLS_DIR/playbooks"
+cp "$SCRIPT_DIR/playbooks/"*.md "$SKILLS_DIR/playbooks/"
+echo "  ✅ playbooks (4)"
+
+echo ""
+
+# ── 2. Configure MCP server ──────────────────────────────────────────────────
+
+echo "Configuring sbl MCP server ..."
+
+# Check for SBL credentials
+if [ -z "$SBL_EMAIL" ] && [ -z "$SBL_TOKEN" ]; then
+  echo ""
+  echo "  SBL credentials not found in environment."
+  echo "  Set one of:"
+  echo "    export SBL_EMAIL=you@example.com"
+  echo "    export SBL_PASSWORD=your-password"
+  echo "  OR:"
+  echo "    export SBL_TOKEN=your-jwt-token"
+  echo ""
+  read -p "  Enter SBL email: " SBL_EMAIL_INPUT
+  SBL_EMAIL="${SBL_EMAIL:-$SBL_EMAIL_INPUT}"
+  read -sp "  Enter SBL password: " SBL_PASSWORD_INPUT
+  echo ""
+  SBL_PASSWORD="${SBL_PASSWORD:-$SBL_PASSWORD_INPUT}"
+fi
+
+# Detect sbl-mcp location
+SBL_MCP_CMD=""
+if command -v sbl-mcp &>/dev/null; then
+  SBL_MCP_CMD="sbl-mcp"
+elif [ -f "$SCRIPT_DIR/../.venv/bin/python" ]; then
+  SBL_MCP_CMD="$SCRIPT_DIR/../.venv/bin/python -m sbl_mcp"
+elif command -v python3 &>/dev/null; then
+  if python3 -c "import sbl_mcp" 2>/dev/null; then
+    SBL_MCP_CMD="python3 -m sbl_mcp"
+  fi
+fi
+
+if [ -z "$SBL_MCP_CMD" ]; then
+  echo "  ⚠️  sbl-mcp not found. Install it first:"
+  echo "     pip install sbl-mcp"
+  echo "  Then re-run ./setup"
+  echo ""
+  echo "  Skipping MCP server config — skills installed successfully."
+else
+  # Write MCP config to settings.json
+  if [ ! -f "$SETTINGS_FILE" ]; then
+    echo '{}' > "$SETTINGS_FILE"
+  fi
+
+  # Build the env object
+  ENV_JSON="{\"SBL_API_URL\": \"https://api.sbl.so\""
+  [ -n "$SBL_EMAIL" ] && ENV_JSON="$ENV_JSON, \"SBL_EMAIL\": \"$SBL_EMAIL\""
+  [ -n "$SBL_PASSWORD" ] && ENV_JSON="$ENV_JSON, \"SBL_PASSWORD\": \"$SBL_PASSWORD\""
+  [ -n "$SBL_TOKEN" ] && ENV_JSON="$ENV_JSON, \"SBL_TOKEN\": \"$SBL_TOKEN\""
+  [ -n "$SBL_COMPANY_ID" ] && ENV_JSON="$ENV_JSON, \"SBL_COMPANY_ID\": \"$SBL_COMPANY_ID\""
+  ENV_JSON="$ENV_JSON}"
+
+  # Determine command and args
+  if [[ "$SBL_MCP_CMD" == *" "* ]]; then
+    CMD_PART=$(echo "$SBL_MCP_CMD" | awk '{print $1}')
+    ARGS_PART=$(echo "$SBL_MCP_CMD" | cut -d' ' -f2-)
+    # Convert args to JSON array
+    ARGS_JSON="[$(echo "$ARGS_PART" | tr ' ' '\n' | sed 's/.*/"&"/' | paste -sd,)]"
+  else
+    CMD_PART="$SBL_MCP_CMD"
+    ARGS_JSON="[]"
+  fi
+
+  python3 - <<PYEOF
+import json, sys
+
+settings_file = "$SETTINGS_FILE"
+with open(settings_file) as f:
+    settings = json.load(f)
+
+settings.setdefault("mcpServers", {})
+settings["mcpServers"]["sbl"] = {
+    "command": "$CMD_PART",
+    "args": $ARGS_JSON,
+    "env": $ENV_JSON
+}
+
+with open(settings_file, "w") as f:
+    json.dump(settings, f, indent=2)
+
+print("  ✅ MCP server 'sbl' added to ~/.claude/settings.json")
+PYEOF
+fi
+
+# ── 3. Done ──────────────────────────────────────────────────────────────────
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "SBL Stack installed."
+echo ""
+echo "Skills available:"
+echo "  /sbl           — home screen, routes to everything"
+echo "  /sbl-create    — create a new campaign"
+echo "  /sbl-optimize  — fix draft campaigns"
+echo "  /sbl-triage    — daily HI queue + analytics"
+echo "  /sbl-playbook  — strategy advisor"
+echo "  /sbl-retro     — weekly campaign review"
+echo ""
+echo "Set your company ID to skip the prompt each time:"
+echo "  export SBL_COMPANY_ID=<your-company-id>"
+echo ""
+echo "Start a Claude Code session and type /sbl"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""

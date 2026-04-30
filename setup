@@ -2,7 +2,8 @@
 # SBL Stack setup — installs skills and MCP server config into Claude Code
 set -e
 
-SKILLS_DIR="$HOME/.claude/skills/sbl"
+SKILLS_ROOT="$HOME/.claude/skills"
+SBL_NAMESPACE="$HOME/.claude/skills/sbl"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -13,19 +14,36 @@ echo ""
 
 # ── 1. Install skills ────────────────────────────────────────────────────────
 
-echo "Installing skills to $SKILLS_DIR ..."
-mkdir -p "$SKILLS_DIR"
+echo "Installing skills to $SKILLS_ROOT ..."
 
-for skill in sbl sbl-create sbl-optimize sbl-triage sbl-playbook sbl-retro; do
-  mkdir -p "$SKILLS_DIR/$skill"
-  cp "$SCRIPT_DIR/$skill/SKILL.md" "$SKILLS_DIR/$skill/SKILL.md"
+# Copy playbooks into the sbl namespace folder (sub-skills reference them via absolute path)
+mkdir -p "$SBL_NAMESPACE/playbooks"
+cp "$SCRIPT_DIR/playbooks/"*.md "$SBL_NAMESPACE/playbooks/"
+echo "  ✅ playbooks (4)"
+
+# Install /sbl home skill directly into the namespace folder
+# Sub-skill path references are rewritten to absolute paths
+mkdir -p "$SBL_NAMESPACE"
+sed \
+  -e "s|sbl-create/SKILL.md|$SKILLS_ROOT/sbl-create/SKILL.md|g" \
+  -e "s|sbl-optimize/SKILL.md|$SKILLS_ROOT/sbl-optimize/SKILL.md|g" \
+  -e "s|sbl-triage/SKILL.md|$SKILLS_ROOT/sbl-triage/SKILL.md|g" \
+  -e "s|sbl-playbook/SKILL.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
+  -e "s|sbl-retro/SKILL.md|$SKILLS_ROOT/sbl-retro/SKILL.md|g" \
+  -e "s|sbl-science/SKILL.md|$SKILLS_ROOT/sbl-science/SKILL.md|g" \
+  "$SCRIPT_DIR/sbl/SKILL.md" > "$SBL_NAMESPACE/SKILL.md"
+echo "  ✅ sbl (home)"
+
+# Install sub-skills at the top level of ~/.claude/skills/
+# Playbook path references are rewritten to absolute paths
+for skill in sbl-create sbl-optimize sbl-triage sbl-playbook sbl-retro sbl-science; do
+  mkdir -p "$SKILLS_ROOT/$skill"
+  sed \
+    -e "s|playbooks/|$SBL_NAMESPACE/playbooks/|g" \
+    -e "s|sbl-playbook/SKILL.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
+    "$SCRIPT_DIR/$skill/SKILL.md" > "$SKILLS_ROOT/$skill/SKILL.md"
   echo "  ✅ $skill"
 done
-
-# Copy playbooks
-mkdir -p "$SKILLS_DIR/playbooks"
-cp "$SCRIPT_DIR/playbooks/"*.md "$SKILLS_DIR/playbooks/"
-echo "  ✅ playbooks (4)"
 
 echo ""
 
@@ -127,6 +145,7 @@ echo "  /sbl-optimize  — fix draft campaigns"
 echo "  /sbl-triage    — daily HI queue + analytics"
 echo "  /sbl-playbook  — strategy advisor"
 echo "  /sbl-retro     — weekly campaign review"
+echo "  /sbl-science   — campaign science loop (PIC × CIQ × MRS)"
 echo ""
 echo "Set your company ID to skip the prompt each time:"
 echo "  export SBL_COMPANY_ID=<your-company-id>"

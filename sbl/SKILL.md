@@ -20,6 +20,8 @@ triggers:
   - what should I do with my campaigns
   - manage my campaigns
   - sbl.so campaigns
+  - campaign science
+  - triple constraint
 ---
 
 ## Step 0 — Auth and company context
@@ -125,6 +127,7 @@ B) Optimize a draft                → /sbl-optimize  [show if CREATED campaigns
 C) Triage the HI queue             → /sbl-triage    [show if HI count > 0]
 D) Get a playbook strategy         → /sbl-playbook
 E) Weekly retro — full overview    → /sbl-retro
+F) Campaign Science loop           → /sbl-science   [PIC × CIQ × MRS diagnosis]
 ```
 
 ---
@@ -138,6 +141,7 @@ Based on the user's choice, read the corresponding skill file and execute it fro
 - **C (Triage):** Read `sbl-triage/SKILL.md` and follow it from Step 0.
 - **D (Playbook):** Read `sbl-playbook/SKILL.md` and follow it from Step 0.
 - **E (Retro):** Read `sbl-retro/SKILL.md` and follow it from Step 0.
+- **F (Science):** Read `sbl-science/SKILL.md` and follow it from Step 0.
 
 Each sub-skill is self-contained — follow it completely before returning control here.
 

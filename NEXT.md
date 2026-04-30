@@ -1,6 +1,20 @@
 # SBL Stack — What's Next
 
-The SBL Stack v1.0 ships 6 skills and 9 MCP tools. Here is the prioritized build plan.
+The SBL Stack v1.1 ships 7 skills and 9 MCP tools. See changelog below.
+
+---
+
+## Changelog
+
+### v1.1 — Campaign Sales Science Framework
+- Added `/sbl-science` skill: Triple Constraint Model (Performance = PIC × CIQ × MRS)
+  live diagnosis from campaign data, binding constraint identification, optimization
+  prescriptions, A/B experiment design, and 90-day projection.
+- Updated `/sbl` home screen to include option F: Campaign Science loop.
+- Based on SBL Research Paper: "Scaling LinkedIn Outreach to Email-Level Infrastructure"
+  (35-affiliate study, 3,951 outreach attempts, 7 days).
+
+---
 
 ---
 

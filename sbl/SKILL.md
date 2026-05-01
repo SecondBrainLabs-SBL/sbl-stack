@@ -26,7 +26,15 @@ triggers:
 
 ## Step 0 — Auth and company context
 
-Check if `SBL_COMPANY_ID` env var is set.
+This skill assumes the `sbl` MCP server is connected. If `sbl_list_campaigns` (or any `sbl_*` tool) returns 401 / "Unauthorized" at any point, stop and tell the user:
+
+> Your sbl.so credentials aren't working. Fix it in 2 steps:
+> 1. Go to **https://sbl.so/api-integration** and click **Create new key** (copy the `sk_live_…` value — shown once).
+> 2. Paste it where the MCP is configured:
+>    - **Claude Desktop:** re-install the `.dxt` from https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest, paste the key into the install dialog.
+>    - **Claude Code:** edit `~/.claude/settings.json` → `mcpServers.sbl.env.SBL_API_KEY`, then restart Claude Code.
+
+Then check `SBL_COMPANY_ID`:
 
 ```bash
 echo "COMPANY_ID: ${SBL_COMPANY_ID:-not_set}"

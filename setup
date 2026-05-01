@@ -51,21 +51,27 @@ echo ""
 
 echo "Configuring sbl MCP server ..."
 
-# Check for SBL credentials
-if [ -z "$SBL_EMAIL" ] && [ -z "$SBL_TOKEN" ]; then
+# Check for SBL credentials — prefer the API key (long-lived, revocable, recommended).
+if [ -z "$SBL_API_KEY" ] && [ -z "$SBL_EMAIL" ] && [ -z "$SBL_TOKEN" ]; then
   echo ""
   echo "  SBL credentials not found in environment."
-  echo "  Set one of:"
-  echo "    export SBL_EMAIL=you@example.com"
-  echo "    export SBL_PASSWORD=your-password"
-  echo "  OR:"
-  echo "    export SBL_TOKEN=your-jwt-token"
   echo ""
-  read -p "  Enter SBL email: " SBL_EMAIL_INPUT
-  SBL_EMAIL="${SBL_EMAIL:-$SBL_EMAIL_INPUT}"
-  read -sp "  Enter SBL password: " SBL_PASSWORD_INPUT
+  echo "  Recommended: paste an API key from https://sbl.so/api-integration"
+  echo "  (click 'Create new key', copy the sk_live_… value — shown once)."
   echo ""
-  SBL_PASSWORD="${SBL_PASSWORD:-$SBL_PASSWORD_INPUT}"
+  read -sp "  Paste SBL_API_KEY (or leave blank to use email+password): " SBL_API_KEY_INPUT
+  echo ""
+  SBL_API_KEY="${SBL_API_KEY:-$SBL_API_KEY_INPUT}"
+
+  if [ -z "$SBL_API_KEY" ]; then
+    echo ""
+    echo "  Falling back to email + password (less secure)."
+    read -p "  Enter SBL email: " SBL_EMAIL_INPUT
+    SBL_EMAIL="${SBL_EMAIL:-$SBL_EMAIL_INPUT}"
+    read -sp "  Enter SBL password: " SBL_PASSWORD_INPUT
+    echo ""
+    SBL_PASSWORD="${SBL_PASSWORD:-$SBL_PASSWORD_INPUT}"
+  fi
 fi
 
 # Detect sbl-mcp location
@@ -94,6 +100,7 @@ else
 
   # Build the env object
   ENV_JSON="{\"SBL_API_URL\": \"https://api.sbl.so\""
+  [ -n "$SBL_API_KEY" ] && ENV_JSON="$ENV_JSON, \"SBL_API_KEY\": \"$SBL_API_KEY\""
   [ -n "$SBL_EMAIL" ] && ENV_JSON="$ENV_JSON, \"SBL_EMAIL\": \"$SBL_EMAIL\""
   [ -n "$SBL_PASSWORD" ] && ENV_JSON="$ENV_JSON, \"SBL_PASSWORD\": \"$SBL_PASSWORD\""
   [ -n "$SBL_TOKEN" ] && ENV_JSON="$ENV_JSON, \"SBL_TOKEN\": \"$SBL_TOKEN\""

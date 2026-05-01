@@ -54,14 +54,14 @@ Print a short numbered menu and ask the user which one to run:
 
 When the user picks one, **read the corresponding sub-skill file from this skill bundle** and follow its instructions in the same conversation:
 
-| User picks  | Read this file                  |
-|-------------|---------------------------------|
-| Create      | `sbl-create/SKILL.md`           |
-| Optimize    | `sbl-optimize/SKILL.md`         |
-| Triage      | `sbl-triage/SKILL.md`           |
-| Playbook    | `sbl-playbook/SKILL.md`         |
-| Retro       | `sbl-retro/SKILL.md`            |
-| Science     | `sbl-science/SKILL.md`          |
+| User picks  | Read this file                       |
+|-------------|--------------------------------------|
+| Create      | `sbl-create/INSTRUCTIONS.md`         |
+| Optimize    | `sbl-optimize/INSTRUCTIONS.md`       |
+| Triage      | `sbl-triage/INSTRUCTIONS.md`         |
+| Playbook    | `sbl-playbook/INSTRUCTIONS.md`       |
+| Retro       | `sbl-retro/INSTRUCTIONS.md`          |
+| Science     | `sbl-science/INSTRUCTIONS.md`        |
 
 The sub-skill files reference playbooks under `playbooks/` (b2b-saas.md, edtech.md, agencies.md, recruiters.md). Read those when the sub-skill says to.
 

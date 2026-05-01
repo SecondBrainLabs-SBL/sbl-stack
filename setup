@@ -21,27 +21,36 @@ mkdir -p "$SBL_NAMESPACE/playbooks"
 cp "$SCRIPT_DIR/playbooks/"*.md "$SBL_NAMESPACE/playbooks/"
 echo "  ✅ playbooks (4)"
 
-# Install /sbl home skill directly into the namespace folder
-# Sub-skill path references are rewritten to absolute paths
+# Install /sbl home skill directly into the namespace folder.
+# Source file is sbl/INSTRUCTIONS.md (the rich Claude Code variant).
+# Sub-skill path references in the source are rewritten to absolute paths
+# pointing at SKILL.md in the install location.
 mkdir -p "$SBL_NAMESPACE"
 sed \
+  -e "s|sbl-create/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-create/SKILL.md|g" \
+  -e "s|sbl-optimize/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-optimize/SKILL.md|g" \
+  -e "s|sbl-triage/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-triage/SKILL.md|g" \
+  -e "s|sbl-playbook/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
+  -e "s|sbl-retro/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-retro/SKILL.md|g" \
+  -e "s|sbl-science/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-science/SKILL.md|g" \
   -e "s|sbl-create/SKILL.md|$SKILLS_ROOT/sbl-create/SKILL.md|g" \
   -e "s|sbl-optimize/SKILL.md|$SKILLS_ROOT/sbl-optimize/SKILL.md|g" \
   -e "s|sbl-triage/SKILL.md|$SKILLS_ROOT/sbl-triage/SKILL.md|g" \
   -e "s|sbl-playbook/SKILL.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
   -e "s|sbl-retro/SKILL.md|$SKILLS_ROOT/sbl-retro/SKILL.md|g" \
   -e "s|sbl-science/SKILL.md|$SKILLS_ROOT/sbl-science/SKILL.md|g" \
-  "$SCRIPT_DIR/sbl/SKILL.md" > "$SBL_NAMESPACE/SKILL.md"
+  "$SCRIPT_DIR/sbl/INSTRUCTIONS.md" > "$SBL_NAMESPACE/SKILL.md"
 echo "  ✅ sbl (home)"
 
-# Install sub-skills at the top level of ~/.claude/skills/
-# Playbook path references are rewritten to absolute paths
+# Install sub-skills at the top level of ~/.claude/skills/.
+# Source files are <skill>/INSTRUCTIONS.md, installed as <skill>/SKILL.md.
 for skill in sbl-create sbl-optimize sbl-triage sbl-playbook sbl-retro sbl-science; do
   mkdir -p "$SKILLS_ROOT/$skill"
   sed \
     -e "s|playbooks/|$SBL_NAMESPACE/playbooks/|g" \
+    -e "s|sbl-playbook/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
     -e "s|sbl-playbook/SKILL.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
-    "$SCRIPT_DIR/$skill/SKILL.md" > "$SKILLS_ROOT/$skill/SKILL.md"
+    "$SCRIPT_DIR/$skill/INSTRUCTIONS.md" > "$SKILLS_ROOT/$skill/SKILL.md"
   echo "  ✅ $skill"
 done
 

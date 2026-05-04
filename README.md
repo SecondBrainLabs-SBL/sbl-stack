@@ -34,6 +34,8 @@ SBL Stack is split into two pieces. Install both:
 2. Download `sbl-mcp-<version>.dxt` from [the latest sbl-stack release](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest) (look under the "Assets" section).
 3. Double-click the file → Claude Desktop's install dialog opens → paste the API key → Install.
 
+> **No Python, Node, or other runtime needed.** As of v0.2.0 the extension is fully self-contained — Claude Desktop runs everything for you.
+
 You're done if you only want raw tools. Claude can now list campaigns, send messages, triage leads, etc., on your instruction.
 
 **Step 2 — Add the SBL Stack skill (orchestration)** *(optional but recommended)*
@@ -177,7 +179,7 @@ Every campaign recommendation, benchmark, and copy suggestion comes from these.
 ## Stack
 
 - **Skills** — Claude Code markdown skill format
-- **MCP server** — `sbl-mcp` (Python, stdio). Source is private under the SBL org; the built `.dxt` ships as an asset on this repo's [Releases](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases).
+- **MCP server** — `sbl-mcp` (Node, stdio; bundled with esbuild into a single JS file). Source is private under the SBL org; the built `.dxt` ships as an asset on this repo's [Releases](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases).
 - **API** — sbl.so public API
 
 ---

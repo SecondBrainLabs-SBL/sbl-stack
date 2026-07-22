@@ -118,6 +118,74 @@ Reload your terminal (`source ~/.zshrc`) and you're set.
 
 ---
 
+## The tools (28)
+
+Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
+
+### Campaigns — read & inspect
+| Tool | What it does |
+|------|--------------|
+| `sbl_list_campaigns` | List your campaigns (most recent first) — start here to find a campaign ID |
+| `sbl_get_campaign` | Full details for one campaign: status, channel, persona, sequence, chat flow, stats |
+| `sbl_get_campaign_analytics` | AI-generated insights — what's working, friction, objections, pain points |
+| `sbl_list_campaign_users` | Leads in a campaign, filterable by status (HI queue, active chats, replies) |
+| `sbl_get_conversation` | Full message thread with a specific lead |
+
+### Campaigns — create & edit
+| Tool | What it does |
+|------|--------------|
+| `sbl_create_campaign_from_prompt` | Generate a draft campaign from a natural-language prompt |
+| `sbl_update_campaign_component` | Edit one draft component: ICP, objective, messages, sequence, or smart follow-ups |
+| `sbl_create_retargeting_campaign` | Spin up a new draft targeting users from an existing campaign (by insight, purchase likelihood, or sentiment) |
+
+### Campaign lifecycle
+| Tool | What it does |
+|------|--------------|
+| `sbl_run_campaign` | Launch a draft campaign (requires your explicit approval) |
+| `sbl_end_campaign` | End a running campaign |
+
+### Messaging & human intervention
+| Tool | What it does |
+|------|--------------|
+| `sbl_send_campaign_message` | Send a message to a (non-HI) campaign lead |
+| `sbl_list_human_intervention` | See which leads need a human to step in |
+| `sbl_reply_and_resolve` | Reply to an HI lead and resolve the flag in one durable step |
+| `sbl_resolve_human_intervention` | Resolve an HI flag when no reply is needed |
+| `sbl_add_user_to_campaign` | Add a single lead by LinkedIn URL or phone number |
+
+### Leads — CSV import
+| Tool | What it does |
+|------|--------------|
+| `sbl_upload_campaign_leads_csv` | Upload a leads CSV (up to 20 MB) for a campaign |
+| `sbl_start_csv_lead_import` | Kick off the bulk import of an uploaded CSV |
+| `sbl_get_csv_lead_import_status` | Check / wait on an import job |
+
+### Leads — LinkedIn Sales Navigator
+| Tool | What it does |
+|------|--------------|
+| `sbl_start_sales_navigator_lead_import` | Pull a Sales Navigator lead list into a draft campaign |
+| `sbl_get_sales_navigator_lead_import_status` | Check that import's status |
+
+### Leads — post engagement
+| Tool | What it does |
+|------|--------------|
+| `sbl_preview_post_engagement` | Preview who liked/commented on a LinkedIn post — before importing anyone |
+| `sbl_import_post_engagement_leads` | Import those engagers as campaign leads |
+| `sbl_get_post_engagement_lead_import_status` | Check that import's status |
+| `sbl_configure_post_engagement` | Set up comment-to-DM / like-to-DM behavior on a draft |
+
+### Leads — AI prompt (native ICP)
+| Tool | What it does |
+|------|--------------|
+| `sbl_create_prompt_lead_session` | Describe your ICP in plain English → get lead filters (same chat sbl.so customers use) |
+| `sbl_refine_prompt_lead_session` | Refine those filters (up to 2 refinements) |
+| `sbl_get_prompt_lead_session` | Check the session/export state |
+| `sbl_approve_prompt_lead_sample` | Approve and start the real lead export (billable; default 10, max 100 leads) |
+
+> Safety by design: nothing launches, sends, or bills without an explicit approval step — drafts stay drafts until you say go.
+
+---
+
 ## The playbooks
 
 SBL Stack ships with four proprietary playbooks built from real sbl.so campaign data.

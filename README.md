@@ -51,29 +51,59 @@ The skill audits your campaigns, surfaces what needs attention, and routes you t
 
 ---
 
-### Option B — Claude Code (terminal-based)
+### Option B — Remote MCP URL (beta) — Claude Code, Codex, n8n, API 🌐
 
-The MCP server itself now ships as a bundled Node DXT (see Option A) rather than a pip package, so there is not yet a documented one-line `claude mcp add` install for Claude Code. **Coming soon.**
+No download at all. The sbl.so MCP server is hosted at **`https://mcp.sbl.so/mcp`** — connect any MCP client with your API key as a bearer header.
 
-In the meantime, if you live in the terminal:
+First, get your API key at [sbl.so/api-integration](https://sbl.so/api-integration) → "Create new key" → copy the value.
 
-#### Step 1 — Install Claude Code
-
-Download from [claude.ai/code](https://claude.ai/code).
-
-#### Step 2 — Install SBL Stack (skills only)
+#### Claude Code
 
 ```bash
-git clone https://github.com/SecondBrainLabs-SBL/sbl-stack
-cd sbl-stack
-./setup
+claude mcp add sbl --transport http https://mcp.sbl.so/mcp \
+  --header "Authorization: Bearer YOUR_KEY_HERE"
 ```
 
-The setup script asks for your **sbl.so API key** (create one at [sbl.so/api-integration](https://sbl.so/api-integration)) and wires up the `/sbl` skills.
+Restart Claude Code — the 28 `sbl_*` tools are available. Optionally also install the `/sbl` skills:
 
-#### Step 3 — Tools (sbl-mcp)
+```bash
+git clone https://github.com/SecondBrainLabs-SBL/sbl-stack && cd sbl-stack && ./setup
+```
 
-For the `sbl_*` MCP tools themselves under Claude Code, use the Claude Desktop DXT path (Option A) for now. Direct Claude Code registration will be documented once a supported invocation is published.
+#### Codex CLI
+
+```bash
+codex mcp add sbl --url https://mcp.sbl.so/mcp --bearer-token-env-var SBL_MCP_KEY
+```
+
+> ⚠️ `--bearer-token-env-var` takes the **name** of an environment variable (`SBL_MCP_KEY`), **not** the key itself — pasting the key there is the #1 setup mistake.
+
+Then make the key available and start Codex:
+
+```bash
+# terminal Codex — add to ~/.zshrc so it's set once, forever:
+export SBL_MCP_KEY='YOUR_KEY_HERE'
+
+# Codex desktop app (doesn't read ~/.zshrc) — run once per boot instead:
+launchctl setenv SBL_MCP_KEY 'YOUR_KEY_HERE'
+```
+
+#### n8n
+
+Add an **MCP Client Tool** node → Endpoint `https://mcp.sbl.so/mcp` → Transport: HTTP Streamable → Header `Authorization` = `Bearer YOUR_KEY_HERE` → connect it to your AI Agent node.
+
+#### Anthropic API (build your own agent)
+
+```json
+"mcp_servers": [{
+  "type": "url",
+  "url": "https://mcp.sbl.so/mcp",
+  "name": "sbl",
+  "authorization_token": "YOUR_KEY_HERE"
+}]
+```
+
+> **Note:** claude.ai web "custom connectors" require OAuth and aren't supported yet — for Claude Desktop use the DXT (Option A); it's the smoother experience there anyway.
 
 ---
 

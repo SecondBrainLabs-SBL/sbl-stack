@@ -30,11 +30,12 @@ SBL Stack is split into two pieces. Install both:
 
 **Step 1 — Install the sbl-mcp extension (tools)**
 
-1. Get your sbl.so API key at [sbl.so/api-integration](https://sbl.so/api-integration) → "Create new key" → copy the `sk_live_…` value.
-2. Download `sbl-mcp-<version>.dxt` from [the latest sbl-stack release](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest) (look under the "Assets" section).
-3. Double-click the file → Claude Desktop's install dialog opens → paste the API key → Install.
+1. Get your sbl.so API key at [sbl.so/api-integration](https://sbl.so/api-integration) → "Create new key" → copy the value.
+2. Download `sbl-mcp-0.2.2.dxt` from [the latest sbl-stack release](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest) (look under the "Assets" section).
+3. Double-click the file → Claude Desktop's install dialog opens.
+4. The extension will prompt for two values: your **sbl.so API Key** (required — paste what you copied in step 1) and an optional **API URL** (leave the default `https://api.sbl.so` unless your account is on a non-prod environment). Click Install.
 
-> **No Python, Node, or other runtime needed.** As of v0.2.0 the extension is fully self-contained — Claude Desktop runs everything for you.
+> **No Python, Node, or other runtime needed.** As of v0.2.0 the extension is fully self-contained — Claude Desktop runs everything for you. v0.2.2 exposes the full 28-tool suite: campaign lifecycle, human-intervention resolution, retargeting, and three lead sources (CSV, LinkedIn, prompt-based).
 
 You're done if you only want raw tools. Claude can now list campaigns, send messages, triage leads, etc., on your instruction.
 
@@ -50,23 +51,17 @@ The skill audits your campaigns, surfaces what needs attention, and routes you t
 
 ---
 
-### Option B — Claude Code (for developers, terminal-based)
+### Option B — Claude Code (terminal-based)
 
-Better if you live in the terminal.
+The MCP server itself now ships as a bundled Node DXT (see Option A) rather than a pip package, so there is not yet a documented one-line `claude mcp add` install for Claude Code. **Coming soon.**
+
+In the meantime, if you live in the terminal:
 
 #### Step 1 — Install Claude Code
 
 Download from [claude.ai/code](https://claude.ai/code).
 
-#### Step 2 — Install the SBL MCP server
-
-```bash
-pip install sbl-mcp
-```
-
-> Don't have pip? [Install Python first](https://python.org/downloads).
-
-#### Step 3 — Install SBL Stack
+#### Step 2 — Install SBL Stack (skills only)
 
 ```bash
 git clone https://github.com/SecondBrainLabs-SBL/sbl-stack
@@ -74,9 +69,11 @@ cd sbl-stack
 ./setup
 ```
 
-The setup script asks for your **sbl.so API key** (create one at [sbl.so/api-integration](https://sbl.so/api-integration)) and wires everything up.
+The setup script asks for your **sbl.so API key** (create one at [sbl.so/api-integration](https://sbl.so/api-integration)) and wires up the `/sbl` skills.
 
-**That's it.** Open Claude Code and type `/sbl`.
+#### Step 3 — Tools (sbl-mcp)
+
+For the `sbl_*` MCP tools themselves under Claude Code, use the Claude Desktop DXT path (Option A) for now. Direct Claude Code registration will be documented once a supported invocation is published.
 
 ---
 
@@ -141,13 +138,8 @@ Every campaign recommendation, benchmark, and copy suggestion comes from these.
 → *Claude Desktop:* re-install the `.dxt` and restart the app.
 → *Claude Code:* make sure you ran `./setup` and restarted Claude Code after.
 
-**"sbl-mcp not found" during setup** (Claude Code only)
-→ Run `pip install sbl-mcp` first, then re-run `./setup`.
-
 **401 / "Unauthorized" when Claude calls a tool**
-→ Your API key is missing, wrong, or revoked. Go to [sbl.so/api-integration](https://sbl.so/api-integration), create a new one, and:
-  - *Claude Desktop:* re-install the `.dxt` and paste the new key.
-  - *Claude Code:* re-run `./setup` with the new key, or edit `~/.claude/settings.json` directly (look for `mcpServers.sbl.env.SBL_API_KEY`).
+→ Your API key is missing, wrong, or revoked. Go to [sbl.so/api-integration](https://sbl.so/api-integration), create a new one, and re-install the `.dxt` in Claude Desktop, pasting the new key when prompted.
 
 **Campaigns not loading**
 → Make sure `SBL_COMPANY_ID` is set correctly (sbl.so → Settings → Company).

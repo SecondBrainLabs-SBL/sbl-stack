@@ -72,21 +72,30 @@ git clone https://github.com/SecondBrainLabs-SBL/sbl-stack && cd sbl-stack && ./
 
 #### Codex CLI
 
+Simplest: add the header directly to `~/.codex/config.toml` — set once, works for both terminal Codex and the desktop app:
+
+```toml
+[mcp_servers.sbl]
+url = "https://mcp.sbl.so/mcp"
+
+[mcp_servers.sbl.http_headers]
+Authorization = "Bearer YOUR_KEY_HERE"
+```
+
+Restart Codex — done.
+
+<details>
+<summary>Alternative: keep the key out of config.toml (env-var indirection)</summary>
+
 ```bash
 codex mcp add sbl --url https://mcp.sbl.so/mcp --bearer-token-env-var SBL_MCP_KEY
 ```
 
 > ⚠️ `--bearer-token-env-var` takes the **name** of an environment variable (`SBL_MCP_KEY`), **not** the key itself — pasting the key there is the #1 setup mistake.
 
-Then make the key available and start Codex:
+Then supply the key: terminal Codex — `export SBL_MCP_KEY='YOUR_KEY_HERE'` in `~/.zshrc`; Codex desktop app (doesn't read `~/.zshrc`) — `launchctl setenv SBL_MCP_KEY 'YOUR_KEY_HERE'` once per boot.
 
-```bash
-# terminal Codex — add to ~/.zshrc so it's set once, forever:
-export SBL_MCP_KEY='YOUR_KEY_HERE'
-
-# Codex desktop app (doesn't read ~/.zshrc) — run once per boot instead:
-launchctl setenv SBL_MCP_KEY 'YOUR_KEY_HERE'
-```
+</details>
 
 #### n8n
 

@@ -1,31 +1,22 @@
 #!/usr/bin/env bash
-# SBL Stack setup — installs skills and MCP server config into Claude Code
-set -e
+# Install the SBL Stack skills for Claude Code. The MCP server is hosted; this
+# script never reads or stores an SBL API key.
+set -euo pipefail
 
-SKILLS_ROOT="$HOME/.claude/skills"
-SBL_NAMESPACE="$HOME/.claude/skills/sbl"
-SETTINGS_FILE="$HOME/.claude/settings.json"
+SBL_INSTALL_HOME="${SBL_SETUP_HOME:-$HOME}"
+SKILLS_ROOT="$SBL_INSTALL_HOME/.claude/skills"
+SBL_NAMESPACE="$SKILLS_ROOT/sbl"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo ""
-echo "SBL Stack — Setup"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "SBL Stack 0.2.3 — skill setup"
 echo ""
 
-# ── 1. Install skills ────────────────────────────────────────────────────────
-
-echo "Installing skills to $SKILLS_ROOT ..."
-
-# Copy playbooks into the sbl namespace folder (sub-skills reference them via absolute path)
 mkdir -p "$SBL_NAMESPACE/playbooks"
 cp "$SCRIPT_DIR/playbooks/"*.md "$SBL_NAMESPACE/playbooks/"
-echo "  ✅ playbooks (4)"
 
-# Install /sbl home skill directly into the namespace folder.
-# Source file is sbl/INSTRUCTIONS.md (the rich Claude Code variant).
-# Sub-skill path references in the source are rewritten to absolute paths
-# pointing at SKILL.md in the install location.
-mkdir -p "$SBL_NAMESPACE"
+# Install the Claude Code home skill and retain the independent controlled-launch
+# checklist that the home and create flows load before any launch-affecting step.
 sed \
   -e "s|sbl-create/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-create/SKILL.md|g" \
   -e "s|sbl-optimize/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-optimize/SKILL.md|g" \
@@ -33,139 +24,32 @@ sed \
   -e "s|sbl-playbook/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
   -e "s|sbl-retro/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-retro/SKILL.md|g" \
   -e "s|sbl-science/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-science/SKILL.md|g" \
-  -e "s|sbl-create/SKILL.md|$SKILLS_ROOT/sbl-create/SKILL.md|g" \
-  -e "s|sbl-optimize/SKILL.md|$SKILLS_ROOT/sbl-optimize/SKILL.md|g" \
-  -e "s|sbl-triage/SKILL.md|$SKILLS_ROOT/sbl-triage/SKILL.md|g" \
-  -e "s|sbl-playbook/SKILL.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
-  -e "s|sbl-retro/SKILL.md|$SKILLS_ROOT/sbl-retro/SKILL.md|g" \
-  -e "s|sbl-science/SKILL.md|$SKILLS_ROOT/sbl-science/SKILL.md|g" \
+  -e "s|sbl/SKILL_MCP.md|$SBL_NAMESPACE/SKILL_MCP.md|g" \
   "$SCRIPT_DIR/sbl/INSTRUCTIONS.md" > "$SBL_NAMESPACE/SKILL.md"
-echo "  ✅ sbl (home)"
+cp "$SCRIPT_DIR/sbl/SKILL_MCP.md" "$SBL_NAMESPACE/SKILL_MCP.md"
 
-# Install sub-skills at the top level of ~/.claude/skills/.
-# Source files are <skill>/INSTRUCTIONS.md, installed as <skill>/SKILL.md.
 for skill in sbl-create sbl-optimize sbl-triage sbl-playbook sbl-retro sbl-science; do
   mkdir -p "$SKILLS_ROOT/$skill"
   sed \
     -e "s|playbooks/|$SBL_NAMESPACE/playbooks/|g" \
     -e "s|sbl-playbook/INSTRUCTIONS.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
     -e "s|sbl-playbook/SKILL.md|$SKILLS_ROOT/sbl-playbook/SKILL.md|g" \
+    -e "s|sbl/SKILL_MCP.md|$SBL_NAMESPACE/SKILL_MCP.md|g" \
     "$SCRIPT_DIR/$skill/INSTRUCTIONS.md" > "$SKILLS_ROOT/$skill/SKILL.md"
-  echo "  ✅ $skill"
 done
 
+echo "Installed: sbl, sbl-create, sbl-optimize, sbl-triage, sbl-playbook, sbl-retro, sbl-science"
 echo ""
-
-# ── 2. Configure MCP server ──────────────────────────────────────────────────
-
-echo "Configuring sbl MCP server ..."
-
-# Check for SBL credentials — prefer the API key (long-lived, revocable, recommended).
-if [ -z "$SBL_API_KEY" ] && [ -z "$SBL_EMAIL" ] && [ -z "$SBL_TOKEN" ]; then
-  echo ""
-  echo "  SBL credentials not found in environment."
-  echo ""
-  echo "  Recommended: paste an API key from https://sbl.so/api-integration"
-  echo "  (click 'Create new key', copy the sk_live_… value — shown once)."
-  echo ""
-  read -sp "  Paste SBL_API_KEY (or leave blank to use email+password): " SBL_API_KEY_INPUT
-  echo ""
-  SBL_API_KEY="${SBL_API_KEY:-$SBL_API_KEY_INPUT}"
-
-  if [ -z "$SBL_API_KEY" ]; then
-    echo ""
-    echo "  Falling back to email + password (less secure)."
-    read -p "  Enter SBL email: " SBL_EMAIL_INPUT
-    SBL_EMAIL="${SBL_EMAIL:-$SBL_EMAIL_INPUT}"
-    read -sp "  Enter SBL password: " SBL_PASSWORD_INPUT
-    echo ""
-    SBL_PASSWORD="${SBL_PASSWORD:-$SBL_PASSWORD_INPUT}"
-  fi
-fi
-
-# Detect sbl-mcp location
-SBL_MCP_CMD=""
-if command -v sbl-mcp &>/dev/null; then
-  SBL_MCP_CMD="sbl-mcp"
-elif [ -f "$SCRIPT_DIR/../.venv/bin/python" ]; then
-  SBL_MCP_CMD="$SCRIPT_DIR/../.venv/bin/python -m sbl_mcp"
-elif command -v python3 &>/dev/null; then
-  if python3 -c "import sbl_mcp" 2>/dev/null; then
-    SBL_MCP_CMD="python3 -m sbl_mcp"
-  fi
-fi
-
-if [ -z "$SBL_MCP_CMD" ]; then
-  echo "  ⚠️  sbl-mcp not found. Install it first:"
-  echo "     pip install sbl-mcp"
-  echo "  Then re-run ./setup"
-  echo ""
-  echo "  Skipping MCP server config — skills installed successfully."
-else
-  # Write MCP config to settings.json
-  if [ ! -f "$SETTINGS_FILE" ]; then
-    echo '{}' > "$SETTINGS_FILE"
-  fi
-
-  # Build the env object
-  ENV_JSON="{\"SBL_API_URL\": \"https://api.sbl.so\""
-  [ -n "$SBL_API_KEY" ] && ENV_JSON="$ENV_JSON, \"SBL_API_KEY\": \"$SBL_API_KEY\""
-  [ -n "$SBL_EMAIL" ] && ENV_JSON="$ENV_JSON, \"SBL_EMAIL\": \"$SBL_EMAIL\""
-  [ -n "$SBL_PASSWORD" ] && ENV_JSON="$ENV_JSON, \"SBL_PASSWORD\": \"$SBL_PASSWORD\""
-  [ -n "$SBL_TOKEN" ] && ENV_JSON="$ENV_JSON, \"SBL_TOKEN\": \"$SBL_TOKEN\""
-  [ -n "$SBL_COMPANY_ID" ] && ENV_JSON="$ENV_JSON, \"SBL_COMPANY_ID\": \"$SBL_COMPANY_ID\""
-  ENV_JSON="$ENV_JSON}"
-
-  # Determine command and args
-  if [[ "$SBL_MCP_CMD" == *" "* ]]; then
-    CMD_PART=$(echo "$SBL_MCP_CMD" | awk '{print $1}')
-    ARGS_PART=$(echo "$SBL_MCP_CMD" | cut -d' ' -f2-)
-    # Convert args to JSON array
-    ARGS_JSON="[$(echo "$ARGS_PART" | tr ' ' '\n' | sed 's/.*/"&"/' | paste -sd,)]"
-  else
-    CMD_PART="$SBL_MCP_CMD"
-    ARGS_JSON="[]"
-  fi
-
-  python3 - <<PYEOF
-import json, sys
-
-settings_file = "$SETTINGS_FILE"
-with open(settings_file) as f:
-    settings = json.load(f)
-
-settings.setdefault("mcpServers", {})
-settings["mcpServers"]["sbl"] = {
-    "command": "$CMD_PART",
-    "args": $ARGS_JSON,
-    "env": $ENV_JSON
-}
-
-with open(settings_file, "w") as f:
-    json.dump(settings, f, indent=2)
-
-print("  ✅ MCP server 'sbl' added to ~/.claude/settings.json")
-PYEOF
-fi
-
-# ── 3. Done ──────────────────────────────────────────────────────────────────
-
+echo "Hosted MCP: https://mcp.sbl.so/mcp"
+echo "API keys:   https://app.secondbrainlabs.com/mcp-server"
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "SBL Stack installed."
+echo "This script deliberately did not request, print, or persist your API key."
+echo "Set SBL_API_KEY in the environment or secret manager used to start Claude Code."
+echo "Then configure the hosted server using an environment-variable reference:"
 echo ""
-echo "Skills available:"
-echo "  /sbl           — home screen, routes to everything"
-echo "  /sbl-create    — create a new campaign"
-echo "  /sbl-optimize  — fix draft campaigns"
-echo "  /sbl-triage    — daily HI queue + analytics"
-echo "  /sbl-playbook  — strategy advisor"
-echo "  /sbl-retro     — weekly campaign review"
-echo "  /sbl-science   — campaign science loop (PIC × CIQ × MRS)"
+echo "  claude mcp add --scope user --transport http sbl https://mcp.sbl.so/mcp \\"
+echo "    --header 'Authorization: Bearer \${SBL_API_KEY}'"
 echo ""
-echo "Set your company ID to skip the prompt each time:"
-echo "  export SBL_COMPANY_ID=<your-company-id>"
-echo ""
-echo "Start a Claude Code session and type /sbl"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
+echo "Keep the literal \${SBL_API_KEY} reference in client configuration; do not"
+echo "replace it with the secret or paste the secret into chat. Restart Claude Code,"
+echo "verify that exactly 30 sbl_* tools are visible, then invoke /sbl."

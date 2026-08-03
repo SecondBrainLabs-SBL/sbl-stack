@@ -2,9 +2,9 @@
 name: sbl-create
 version: 1.0.0
 description: |
-  SBL Campaign Creator — walks through qualifying questions, matches your ICP to the
-  right playbook strategy, builds a rich AI prompt, generates the campaign via the
-  sbl.so API, then scores and surfaces gaps with specific copy fixes.
+  SBL Campaign Creator — builds and inspects one run-owned draft, binds an
+  explicitly chosen LinkedIn sender with revision protection, and defaults to one
+  manually approved recipient before any separately approved launch.
   Use when asked to "create a campaign", "new campaign", "set up outreach", or
   "I want to run a LinkedIn campaign".
   Invoked by /sbl automatically when the user picks "Create new campaign". (sbl-stack)
@@ -19,6 +19,19 @@ triggers:
   - start a campaign
 ---
 
+## Required authority — read before Step 0
+
+Before doing anything else, read `sbl/SKILL_MCP.md` completely. It is the
+authoritative checklist for every LinkedIn write and for all launch, replay,
+verification, resume, and end behavior. This create flow may collect inputs and
+prepare a draft, but it must not weaken, replace, or duplicate that checklist. If
+the checklist cannot be loaded, stop before any write.
+
+The public v0.2.3 executable orchestration path is LinkedIn only. WhatsApp and
+iMessage may be discussed as unsupported, deferred draft concepts, but they must
+not proceed to campaign creation, sender binding, recipient addition, launch,
+replay, or end through this flow.
+
 ## Step 0 — Auth and company context
 
 Check if `SBL_COMPANY_ID` env var is set.
@@ -31,14 +44,23 @@ If not set, ask: "What is your sbl.so company ID? (Find it in sbl.so → Setting
 
 Store the company_id for all subsequent MCP calls in this session.
 
+Before asking campaign questions or creating a draft, verify that exactly 30
+`sbl_*` tools are visible and make `sbl_list_linkedin_channels` the first tool
+call. If no channel is returned, pause and direct the user to
+https://app.secondbrainlabs.com/settings?tab=communication. After they return,
+relist; do not accept a verbal claim as proof. Show the redacted channel IDs/names
+and require an explicit sender choice even when there is only one. Then run the
+read-only `sbl_list_campaigns` smoke. Do not perform a write unless both reads pass.
+
 ---
 
 ## Step 1 — Qualifying questions
 
-Ask these as a single question block — do not ask one at a time:
+Ask these as a single question block — do not ask one at a time. Never ask for an
+API key or authorization header:
 
 ```
-To build the best possible campaign I need 8 quick answers:
+To build the safest useful campaign I need 8 quick answers:
 
 1. What is your product or service? (one sentence — what it does and who it's for)
 
@@ -52,9 +74,9 @@ To build the best possible campaign I need 8 quick answers:
    e) Other: ___
 
 4. Which channel?
-   a) LinkedIn
-   b) WhatsApp
-   c) iMessage
+   a) LinkedIn (supported executable orchestration)
+   b) WhatsApp (unsupported/deferred concept only)
+   c) iMessage (unsupported/deferred concept only)
 
 5. Which vertical best describes your ICP?
    a) B2B SaaS / Tech founders
@@ -70,14 +92,16 @@ To build the best possible campaign I need 8 quick answers:
 7. What is your calendar or booking link? (paste the actual URL — it goes into
    the chat flow so the AI can share it with interested leads)
 
-8. What lead source are you planning to use?
-   a) Cold list — Sales Navigator + ICP Filter
-   b) Post engagement — target people who liked/commented a specific post
-   c) Community signal — target members of a specific LinkedIn community
-   d) Comment-to-DM — auto-DM anyone who comments on a specific post
-   e) Warm audience — existing leads, webinar lists, past customers
-   f) Not sure — help me pick
+8. Who is the single recipient for the first controlled proof?
+   Share their full name and LinkedIn profile URL, and confirm this exact person is
+   approved for the proof. The safe default is one manual recipient. CSV, prompt
+   leads, Sales Navigator, post engagement, retargeting, and bulk imports require
+   a separate request after this proof; do not select or start them by default.
 ```
+
+If answer 4 is not LinkedIn, provide only a non-executable campaign concept and
+stop before Step 2. Do not call any campaign create, bind, recipient, launch,
+replay, or end tool for that concept.
 
 ---
 
@@ -111,8 +135,8 @@ GOAL: [answer 3]
 CHANNEL: [answer 4]
 VERTICAL: [answer 5]
 
-CAMPAIGN TYPE: [from playbook — community signal / post engagement / Sales Nav / warm audience]
-LEAD SOURCE: [from answer 8, validated against playbook recommendation]
+CAMPAIGN TYPE: controlled one-recipient proof
+LEAD SOURCE: one manually approved LinkedIn recipient from answer 8
 
 TONE AND ANGLE: [from playbook for this vertical]
   - [key message rule 1 from playbook]
@@ -157,12 +181,14 @@ MUST INCLUDE:
 Call the `sbl_create_campaign_from_prompt` MCP tool with:
 - `company_id`: from Step 0
 - `description`: the full prompt built in Step 3
-- `channel`: from answer 4 (linkedin / whatsapp / imessage)
+- `channel`: `"linkedin"`
 - `response_format`: "json"
 
 Tell the user: "Generating campaign — this takes 10–20 seconds..."
 
 On success, extract the campaign_id from the response payload.
+This campaign is run-owned. Do not reuse a pre-existing draft for the controlled
+proof and do not create a second draft after an ambiguous response.
 
 ---
 
@@ -203,6 +229,35 @@ Score: [score]/100
 Gaps: [list of gaps]
 ```
 
+Require status CREATED. Record the current positive `revision`, exact messages,
+sequence timing, recipient count, and campaign-user count. Stop if the status or
+content differs from the confirmed brief.
+
+### Step 5A — Discover and bind the LinkedIn sender
+
+For a LinkedIn campaign, call `sbl_list_linkedin_channels` again immediately before
+binding to prove the explicitly chosen sender remains connected.
+
+- If no channel is returned, pause and direct the user to
+  https://app.secondbrainlabs.com/settings?tab=communication. When they return,
+  call `sbl_list_linkedin_channels` again; do not rely on a verbal claim alone.
+- Show only each channel's redacted ID and name. Require the user to choose the
+  exact sender explicitly, even when there is only one.
+- Call `sbl_get_campaign` immediately before binding and use its current revision.
+- Call `sbl_bind_linkedin_channel` with numeric `company_id`, `campaign_id`, the
+  selected numeric `channel_id`, and that exact `expected_revision`.
+- On a revision conflict, refetch, show what changed, and ask before retrying. Do
+  not overwrite, silently retry, launch, send, or call a provider.
+- Refetch and verify the exact sender binding and new revision.
+
+### Step 5B — Add the one approved recipient
+
+Show the recipient name and LinkedIn URL from answer 8 and ask for a final explicit
+confirmation. Only then call `sbl_add_user_to_campaign` once. Do not loop and do
+not fall back to CSV, prompt leads, Sales Navigator, post engagement, retargeting,
+or any bulk tool. Refetch the campaign users and require exactly one recipient for
+this proof. Keep the LinkedIn URL only in the active conversation; do not save it.
+
 ---
 
 ## Step 6 — Score and fix gaps
@@ -233,22 +288,24 @@ If the user provided a calendar link in Step 1 (answer 7):
 
 Present each fix as a clear before/after block. Note: "Apply these in sbl.so → campaign [ID] → Edit before launching."
 
-If `sbl_update_campaign` is available as an MCP tool, offer to apply the fixes automatically.
+If `sbl_update_campaign_component` is available, offer each allow-listed component
+change separately. Refetch the current revision before each accepted change. Never
+invent or call a generic campaign patch.
 
 ---
 
-## Step 7 — Pre-launch checklist
+## Step 7 — Freeze and pre-launch checklist
 
 ```
 Before launching campaign [campaign_id], complete:
 
-[ ] LinkedIn profile connected: sbl.so → Settings → LinkedIn
+[ ] Exactly 30 sbl-mcp 0.2.3 tools visible; read-only campaign smoke passed
+[ ] Exact sender listed, explicitly chosen, and revision-aware binding verified
+[ ] Exactly one manually approved recipient added; no bulk/import workflow used
 [ ] AI persona trained: sbl.so → Settings → Persona (upload voice sample)
 [ ] Calendar link added to chat flow rule #1  ← do this now if not auto-applied
-[ ] Lead source configured in SBL: [specific source from answer 8]
-[ ] ICP Filter set: [if Sales Navigator — minimum 80% match for precision]
-[ ] Fractional SDR profiles added: sbl.so → Settings → Sender Profiles
-    (each profile: 200 CR/week, 200 messages/day — SBL auto-enforces limits)
+[ ] Sender ID/name, recipient, exact messages, sequence timing, status CREATED,
+    current revision, and all counts frozen and shown to the user
 [ ] Check HI queue daily after launch: /sbl-triage
 
 EXPECTED RESULTS (from playbook):
@@ -259,10 +316,18 @@ EXPECTED RESULTS (from playbook):
 Review campaign at sbl.so → Campaigns → [campaign_id]
 ```
 
+Stop this sub-flow at the frozen checklist. Hand the exact verified snapshot to
+`sbl/SKILL_MCP.md` Step 3. That authoritative checklist alone collects launch or
+replay approval, creates and retains operation state, performs launch and bounded
+reconciliation, decides whether a fresh replay approval is even eligible, and
+reports pending residue. Standalone invocation does not bypass that handoff.
+
 ---
 
 ## Step 8 — Hand off
 
-If invoked standalone: "Campaign [ID] is ready to review. Run /sbl-triage once it starts sending to monitor the HI queue."
+If invoked standalone, report the verified state and every residue. Any later
+request to stop or end must be handed to `sbl/SKILL_MCP.md` Step 5; this file does
+not collect end approval or execute end behavior.
 
 If invoked by `/sbl`: return summary and wait for next instruction.

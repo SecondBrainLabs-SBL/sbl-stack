@@ -1,8 +1,15 @@
 # SBL Stack
 
-> Your AI campaign manager for [sbl.so](https://sbl.so) — type `/sbl` in Claude and it audits, creates, optimizes, and triages your campaigns automatically.
+> Your AI campaign manager for [sbl.so](https://sbl.so) — 30 MCP tools plus one
+> safety-first `sbl` orchestration prompt for audit, creation, triage, and a
+> controlled one-recipient launch.
 
 Built on playbook data from **320,000+ delivered messages across 1,200+ campaigns.**
+
+The public v0.2.3 skill executes campaign creation, launch, replay, and end
+orchestration for LinkedIn only. WhatsApp and iMessage may be discussed as
+unsupported, deferred concepts, but this release does not run their launch
+workflows.
 
 ---
 
@@ -30,12 +37,14 @@ SBL Stack is split into two pieces. Install both:
 
 **Step 1 — Install the sbl-mcp extension (tools)**
 
-1. Get your sbl.so API key at [sbl.so/api-integration](https://sbl.so/api-integration) → "Create new key" → copy the value.
-2. Download `sbl-mcp-0.2.2.dxt` from [the latest sbl-stack release](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest) (look under the "Assets" section).
-3. Double-click the file → Claude Desktop's install dialog opens.
+1. Create your sbl.so API key at [SBL MCP settings](https://app.secondbrainlabs.com/mcp-server). Keep it out of chat, screenshots, logs, and plaintext documentation.
+2. Download the v0.2.3 MCP Bundle from [the latest sbl-stack release](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest). The current format is `.mcpb`; a release may also include the former `.dxt` filename for older Claude Desktop builds.
+3. In Claude Desktop, open **Settings → Extensions → Advanced settings → Install Extension** and select the bundle.
 4. The extension will prompt for two values: your **sbl.so API Key** (required — paste what you copied in step 1) and an optional **API URL** (leave the default `https://api.sbl.so` unless your account is on a non-prod environment). Click Install.
 
-> **No Python, Node, or other runtime needed.** As of v0.2.0 the extension is fully self-contained — Claude Desktop runs everything for you. v0.2.2 exposes the full 28-tool suite: campaign lifecycle, human-intervention resolution, retargeting, and three lead sources (CSV, LinkedIn, prompt-based).
+> **No Python, Node, or other user-installed runtime needed.** v0.2.3 exposes
+> exactly 30 tools, including read-only LinkedIn sender discovery and
+> revision-protected sender binding.
 
 You're done if you only want raw tools. Claude can now list campaigns, send messages, triage leads, etc., on your instruction.
 
@@ -45,7 +54,9 @@ You're done if you only want raw tools. Claude can now list campaigns, send mess
 2. In Claude Desktop → **Settings → Skills** (or the skill upload UI in your version) → **Upload skill** → pick the zip you just downloaded.
 3. Open any chat → invoke the **sbl** skill (via the skill picker, the `+` menu, or just say "use the sbl skill").
 
-The skill audits your campaigns, surfaces what needs attention, and routes you to the right sub-flow (create / optimize / triage / retro / playbook / science). Each sub-flow lives in its own subfolder (`sbl-create/`, `sbl-triage/`, etc.) and the top-level `SKILL.md` reads them on demand.
+The uploaded skill audits campaigns and loads its sub-flows on demand. The MCP
+Bundle itself exposes one packaged prompt named `sbl`; it includes the independent
+controlled-launch checklist in `sbl/SKILL_MCP.md`.
 
 > Don't have Claude Desktop? Download from [claude.ai/download](https://claude.ai/download). Free to start.
 
@@ -53,18 +64,23 @@ The skill audits your campaigns, surfaces what needs attention, and routes you t
 
 ### Option B — Remote MCP URL (beta) — Claude Code, Codex, n8n, API 🌐
 
-No download at all. The sbl.so MCP server is hosted at **`https://mcp.sbl.so/mcp`** — connect any MCP client with your API key as a bearer header.
+No server download is needed. The hosted endpoint is
+**`https://mcp.sbl.so/mcp`**. Supply the bearer key through a client environment
+variable or secret store; never paste it into chat or commit it to configuration.
 
-First, get your API key at [sbl.so/api-integration](https://sbl.so/api-integration) → "Create new key" → copy the value.
+Create or revoke the key at
+[SBL MCP settings](https://app.secondbrainlabs.com/mcp-server).
 
 #### Claude Code
 
 ```bash
-claude mcp add sbl --transport http https://mcp.sbl.so/mcp \
-  --header "Authorization: Bearer YOUR_KEY_HERE"
+claude mcp add --scope user --transport http sbl https://mcp.sbl.so/mcp \
+  --header 'Authorization: Bearer ${SBL_API_KEY}'
 ```
 
-Restart Claude Code — the 28 `sbl_*` tools are available. Optionally also install the `/sbl` skills:
+Keep the literal `${SBL_API_KEY}` reference and set the value in the environment or
+secret manager that starts Claude Code. Restart Claude Code and verify exactly 30
+`sbl_*` tools. Optionally install the `/sbl` skills:
 
 ```bash
 git clone https://github.com/SecondBrainLabs-SBL/sbl-stack && cd sbl-stack && ./setup
@@ -72,47 +88,33 @@ git clone https://github.com/SecondBrainLabs-SBL/sbl-stack && cd sbl-stack && ./
 
 #### Codex CLI
 
-Simplest: add the header directly to `~/.codex/config.toml` — set once, works for both terminal Codex and the desktop app:
+Keep the key out of `config.toml` by naming its environment variable:
 
 ```toml
 [mcp_servers.sbl]
 url = "https://mcp.sbl.so/mcp"
-
-[mcp_servers.sbl.http_headers]
-Authorization = "Bearer YOUR_KEY_HERE"
+bearer_token_env_var = "SBL_MCP_KEY"
 ```
 
 Restart Codex — done.
 
-<details>
-<summary>Alternative: keep the key out of config.toml (env-var indirection)</summary>
-
-```bash
-codex mcp add sbl --url https://mcp.sbl.so/mcp --bearer-token-env-var SBL_MCP_KEY
-```
-
-> ⚠️ `--bearer-token-env-var` takes the **name** of an environment variable (`SBL_MCP_KEY`), **not** the key itself — pasting the key there is the #1 setup mistake.
-
-Then supply the key: terminal Codex — `export SBL_MCP_KEY='YOUR_KEY_HERE'` in `~/.zshrc`; Codex desktop app (doesn't read `~/.zshrc`) — `launchctl setenv SBL_MCP_KEY 'YOUR_KEY_HERE'` once per boot.
-
-</details>
+`bearer_token_env_var` takes the variable name, not the key. Put the value in the
+environment or secret manager used to start Codex.
 
 #### n8n
 
-Add an **MCP Client Tool** node → Endpoint `https://mcp.sbl.so/mcp` → Transport: HTTP Streamable → Header `Authorization` = `Bearer YOUR_KEY_HERE` → connect it to your AI Agent node.
+Add an **MCP Client Tool** node → Endpoint `https://mcp.sbl.so/mcp` → Transport:
+HTTP Streamable. Source the bearer authorization credential from an n8n credential
+or secret expression; do not place the key directly in the workflow.
 
 #### Anthropic API (build your own agent)
 
-```json
-"mcp_servers": [{
-  "type": "url",
-  "url": "https://mcp.sbl.so/mcp",
-  "name": "sbl",
-  "authorization_token": "YOUR_KEY_HERE"
-}]
-```
+Configure a URL-type MCP server at `https://mcp.sbl.so/mcp` and load its
+authorization token from your application's secret manager at runtime.
 
-> **Note:** claude.ai web "custom connectors" require OAuth and aren't supported yet — for Claude Desktop use the DXT (Option A); it's the smoother experience there anyway.
+> **Note:** claude.ai web custom connectors require OAuth and are not supported by
+> this bearer-key endpoint. Use the Claude Desktop MCP Bundle or another local MCP
+> client.
 
 ---
 
@@ -157,7 +159,7 @@ Reload your terminal (`source ~/.zshrc`) and you're set.
 
 ---
 
-## The tools (28)
+## The tools (30)
 
 Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 
@@ -169,6 +171,7 @@ Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 | `sbl_get_campaign_analytics` | AI-generated insights — what's working, friction, objections, pain points |
 | `sbl_list_campaign_users` | Leads in a campaign, filterable by status (HI queue, active chats, replies) |
 | `sbl_get_conversation` | Full message thread with a specific lead |
+| `sbl_list_linkedin_channels` | List connected LinkedIn senders as redacted ID/name records |
 
 ### Campaigns — create & edit
 | Tool | What it does |
@@ -176,6 +179,7 @@ Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 | `sbl_create_campaign_from_prompt` | Generate a draft campaign from a natural-language prompt |
 | `sbl_update_campaign_component` | Edit one draft component: ICP, objective, messages, sequence, or smart follow-ups |
 | `sbl_create_retargeting_campaign` | Spin up a new draft targeting users from an existing campaign (by insight, purchase likelihood, or sentiment) |
+| `sbl_bind_linkedin_channel` | Bind an explicitly chosen sender to a CREATED draft using its current revision; never launches |
 
 ### Campaign lifecycle
 | Tool | What it does |
@@ -242,25 +246,24 @@ Every campaign recommendation, benchmark, and copy suggestion comes from these.
 ## Troubleshooting
 
 **`/sbl` isn't recognized**
-→ *Claude Desktop:* re-install the `.dxt` and restart the app.
+→ *Claude Desktop:* reinstall the `.mcpb` bundle (or the release's legacy `.dxt`
+asset if your Claude build requires it) and restart the app.
 → *Claude Code:* make sure you ran `./setup` and restarted Claude Code after.
 
 **401 / "Unauthorized" when Claude calls a tool**
-→ Your API key is missing, wrong, or revoked. Go to [sbl.so/api-integration](https://sbl.so/api-integration), create a new one, and re-install the `.dxt` in Claude Desktop, pasting the new key when prompted.
+→ Create or revoke a key at [SBL MCP settings](https://app.secondbrainlabs.com/mcp-server), update the client outside chat, and reconnect.
 
 **Campaigns not loading**
 → Make sure `SBL_COMPANY_ID` is set correctly (sbl.so → Settings → Company).
 
 **Lost the API key plaintext**
-→ You can't recover it — sbl.so only shows it once. Revoke the old key at sbl.so/api-integration and create a fresh one.
+→ You cannot recover it. Revoke it at [SBL MCP settings](https://app.secondbrainlabs.com/mcp-server) and create a fresh one. Never paste it into chat.
 
 ---
 
 ## Coming soon
 
 - `/sbl-leads` — add and manage leads without leaving Claude
-- Auto-apply copy fixes from `/sbl-optimize` (needs `sbl_update_campaign` API)
-- One-click campaign launch from Claude
 - `/sbl-ab` — A/B test two campaign variants side by side
 
 ---
@@ -278,7 +281,7 @@ Every campaign recommendation, benchmark, and copy suggestion comes from these.
 ## Stack
 
 - **Skills** — Claude Code markdown skill format
-- **MCP server** — `sbl-mcp` (Node, stdio; bundled with esbuild into a single JS file). Source is private under the SBL org; the built `.dxt` ships as an asset on this repo's [Releases](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases).
+- **MCP server** — `sbl-mcp` 0.2.3 (Node stdio bundle plus hosted Streamable HTTP). The current `.mcpb` bundle—and a verified legacy `.dxt` compatibility asset when provided—ships from this repo's [Releases](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases).
 - **API** — sbl.so public API
 
 ---

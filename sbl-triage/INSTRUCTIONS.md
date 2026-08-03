@@ -104,19 +104,27 @@ RECOMMENDED ACTION: [Send reply / Book call / Forward to sales / No action neede
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-After showing each lead's analysis, ask:
-"Send this reply to [name]? (yes / edit / skip)"
+After showing each lead's analysis, freeze the campaign ID, user ID, and exact
+message, then ask: "Reply and resolve for [name]? (yes / edit / skip)"
 
-- **Yes** → call `sbl_send_campaign_message` MCP tool with:
+- **Yes** → create one stable non-secret idempotency key and call
+  `sbl_reply_and_resolve` with:
+  - `company_id`: from Step 0
   - `campaign_id`: the campaign
   - `user_id`: the lead's user ID
-  - `message`: the recommended reply
-  - `response_format`: "json"
-  - Confirm: "Sent ✅"
+  - `message`: the approved exact reply
+  - `idempotency_key`: the stable key
+  Reuse the same key after any ambiguous response. An accepted or HTTP 202 result
+  is not delivery; report the returned operation state honestly.
 
-- **Edit** → ask for the edited message, then send it
+- **Edit** → ask for the edited message, show the frozen exact version, then ask
+  again before calling `sbl_reply_and_resolve`
 
 - **Skip** → move to next lead
+
+Never fall back to `sbl_send_campaign_message` for an HI lead and never split a
+reply from resolution. If state remains ambiguous, stop on that lead with a safe
+resume state instead of sending again.
 
 Work through all HI leads across all campaigns before moving to Step 4.
 
@@ -130,7 +138,8 @@ After working through all leads:
 TRIAGE COMPLETE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Leads triaged:      [N]
-Replies sent:       [N]
+Replies resolved:   [N]
+Pending/unknown:    [N]
 Skipped:            [N]
 
 HIGH INTENT leads (likely to convert):

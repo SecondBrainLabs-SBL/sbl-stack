@@ -4,8 +4,8 @@ version: 1.0.0
 description: |
   SBL Campaign Optimizer — fetches a draft or running campaign, reads its AI
   score and gaps, benchmarks it against playbook data, and generates specific
-  before/after copy fixes for every gap. Auto-applies fixes when sbl_update_campaign
-  is available.
+  before/after copy fixes for every gap. Applies allow-listed fixes through
+  revision-aware component updates when available.
   Use when asked to "optimize my campaign", "fix this campaign", "improve the score",
   or "why is my campaign score low".
   Invoked by /sbl-create (post-generation) and /sbl (when drafts need fixing). (sbl-stack)
@@ -195,13 +195,11 @@ Fix 3: Connection request rewritten with signal hook
 PROJECTED SCORE AFTER FIXES: [estimate — 85–95/100 if all gaps closed]
 ```
 
-If `sbl_update_campaign` MCP tool is available:
-  → Offer to apply all fixes automatically: "Apply all fixes now? (yes/no)"
-  → On yes: call `sbl_update_campaign` with the updated fields
-  → On no: "Copy the fixes above into sbl.so → campaign [ID] → Edit"
-
-If `sbl_update_campaign` is not available:
-  → "Apply these in sbl.so → Campaigns → [campaign_id] → Edit. Each fix is a direct copy-paste."
+If `sbl_update_campaign_component` is available, offer each allow-listed component
+change separately. Refetch the current campaign revision before every accepted
+change and use revision-aware compare-and-set. Never construct or call a generic
+campaign patch. If the component tool is unavailable, direct the user to apply
+the shown fixes in the UI.
 
 ---
 
@@ -228,14 +226,18 @@ This campaign is live. Recommend:
 ```
 Once fixes are applied, before launching:
 [ ] Calendar link in chat flow rule #1 ← most critical
-[ ] LinkedIn profile connected in SBL Settings
+[ ] `sbl_list_linkedin_channels` returned the sender and the user chose it explicitly
+[ ] `sbl_bind_linkedin_channel` succeeded against the latest campaign revision
 [ ] AI persona trained (voice sample uploaded)
-[ ] Lead source configured
-[ ] ICP Filter set (if Sales Navigator — 80%+ match)
-[ ] Fractional SDR profiles added
+[ ] Exact recipient, messages, sequence, status, revision, and counts frozen
+[ ] Literal `LAUNCH` approval will be collected only after the frozen state is shown
 
 /sbl-triage once live — check HI queue daily.
 ```
+
+Do not launch from this optimizer. Hand the frozen draft to the controlled launch
+checklist in `sbl/SKILL_MCP.md`; it owns approval, one stable idempotency key,
+bounded polling, honest pending state, and separate end confirmation.
 
 ---
 

@@ -2,7 +2,7 @@
 name: sbl
 version: 1.0.0
 description: |
-  SBL Stack — the home screen for your sbl.so campaigns. Audits all campaigns,
+  SBL Stack — the home screen for the 30-tool sbl-mcp 0.2.3 surface. Audits all campaigns,
   surfaces what needs attention, and routes to the right sub-skill: create a new
   campaign, optimize a draft, triage the HI queue, get a playbook strategy, or
   run a weekly retro.
@@ -26,13 +26,19 @@ triggers:
 
 ## Step 0 — Auth and company context
 
-This skill assumes the `sbl` MCP server is connected. If `sbl_list_campaigns` (or any `sbl_*` tool) returns 401 / "Unauthorized" at any point, stop and tell the user:
+This skill assumes `https://mcp.sbl.so/mcp` or the current Claude Desktop MCP
+Bundle exposes exactly 30 `sbl_*` tools. Before any write, verify the count and
+run a read-only `sbl_list_campaigns` smoke. Stop on a missing tool, a different
+count, or 401 / "Unauthorized" and tell the user:
 
 > Your sbl.so credentials aren't working. Fix it in 2 steps:
-> 1. Go to **https://sbl.so/api-integration** and click **Create new key** (copy the `sk_live_…` value — shown once).
-> 2. Paste it where the MCP is configured:
->    - **Claude Desktop:** re-install the `.dxt` from https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest, paste the key into the install dialog.
->    - **Claude Code:** edit `~/.claude/settings.json` → `mcpServers.sbl.env.SBL_API_KEY`, then restart Claude Code.
+> 1. Create or revoke a key outside this chat at
+>    **https://app.secondbrainlabs.com/mcp-server**.
+> 2. Update the hosted MCP connection or reinstall the latest MCP Bundle from
+>    https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest, then restart.
+> Never paste the key into chat.
+
+Never print, log, screenshot, save, or repeat an API key or authorization header.
 
 Then check `SBL_COMPANY_ID`:
 
@@ -141,6 +147,19 @@ F) Campaign Science loop           → /sbl-science   [PIC × CIQ × MRS diagnos
 ---
 
 ## Step 4 — Invoke the chosen sub-skill
+
+For Create, sender binding, recipient addition, launch, polling, or end, read the
+installed `sbl/SKILL_MCP.md` controlled-launch checklist first. Its scope,
+approval, compare-and-set, idempotency, delivery, and residue rules override any
+looser instruction below.
+
+Public v0.2.3 executable create, launch, replay, and end orchestration is LinkedIn
+only. WhatsApp and iMessage may be described as unsupported, deferred concepts,
+but must stop before any campaign write or launch workflow.
+
+Treat `LAUNCH` as approval for one initial call only. Never auto-retry after a
+timeout or transport ambiguity. Reconcile read-only, then require the checklist's
+fresh literal `REPLAY` approval before the one permitted same-key replay.
 
 Based on the user's choice, read the corresponding skill file and execute it from Step 0:
 

@@ -190,7 +190,9 @@ Apply status colors based on reply rate vs playbook benchmark:
 Special flags:
 - HI rate > 20% → "🟡 Chat flow gaps — AI escalating too often"
 - Unsubscribe rate > 5% → "🔴 Opener or targeting is wrong"
-- 0 messages delivered after 7 days → "🔴 Check LinkedIn connection or sender profile setup"
+- 0 messages delivered after 7 days → call `sbl_list_linkedin_channels` and inspect
+  the campaign read-only. Report whether a connected sender exists, but do not
+  infer the campaign is bound and do not mutate or rebind it from the retro flow.
 
 ---
 

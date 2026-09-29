@@ -13,13 +13,19 @@ MCP source `0eb6e88cf13582289838f25bc7b0e8a2bdbaa465` is deployed as ECS `sbl-mc
 
 Reconnect your MCP client to refresh its tool catalog. The existing downloadable v0.2.3 MCP bundle has not been rebuilt by this hosted deployment. Health still reports version 0.2.3; use the source/image identity above to distinguish this hosted repair batch.
 
+## Verified live workflows
+
+- Sales Navigator extraction is now verified end to end with an eligible connected account: a bounded 100-lead founder search reached `succeeded`; the lead-list API reports 100 users added. The list remains attached to an unlaunched draft. The previous failure was provider HTTP 403 `errors/subscription_required` on an account without a Sales Navigator seat. Connecting an eligible account resolved this case without another code patch. Do not treat `queued` or `attached` as completed extraction.
+- The one-recipient LinkedIn test campaign 8571 launched through hosted MCP. Its initial recipient was excluded as already belonging to another campaign; the dashboard merge action transferred that one approved recipient into the test campaign. The hosted conversation readback now contains the exact approved test note with message status DELIVERED. Dashboard verification shows one outreach, one connection request sent, zero failures, and zero invitations accepted. This proves the invitation-with-note send path; recipient acceptance/read and a connected-recipient DM are not yet proven. Automatic conversations and follow-ups are disabled; the campaign remains running. No claim of 90% tool coverage is made.
+
+- A separately approved second test from Hariharasudhan (sole sender channel 328) in campaign 8573 also returned the exact test message with status DELIVERED through hosted conversation readback. The imported prospect list was not used for either send test.
+
 ## Still being verified or repaired
 
-- Sales Navigator submission and attachment succeed after the app route repair. The failed company-126 test is now diagnosed: the provider rejected the connected account with HTTP 403 `errors/subscription_required`, “Sales Navigator seat required.” A connected LinkedIn sender alone is insufficient for Sales Navigator extraction; use an account connected with an active Sales Navigator seat. No new search was submitted against the rejected connection. Do not treat `queued` or `attached` as a successful lead import.
 - Campaign end state/notification fixes are deployed in the app. Complete pending-message cleanup remains a separate open repair; ending does not recall messages already sent.
 - Campaign generation can return an error after creating a draft. Check the campaign list before retrying creation.
-- Hosted CSV file handoff and complete conversation retrieval remain open.
-- The one-recipient LinkedIn test campaign 8571 launched through hosted MCP. Its initial recipient was excluded as already belonging to another campaign; the dashboard merge action transferred that one approved recipient into the test campaign. The hosted conversation readback now contains the exact approved test note with message status DELIVERED. Dashboard verification shows one outreach, one connection request sent, zero failures, and zero invitations accepted. This proves the invitation-with-note send path; recipient acceptance/read and a connected-recipient DM are not yet proven. Automatic conversations and follow-ups are disabled; the campaign remains running. No claim of 90% tool coverage is made.
+- Hosted CSV file handoff and complete conversation retrieval remain open. The live one-message thread read passed; this does not close pagination/completeness coverage.
+- MCP sender binding adds a sender; replacing one currently needs the dashboard to remove the previous sender. Moving a lead out of another active campaign also requires the app’s existing Merge action. These are workflow coverage gaps, not a reason to remove existing tools.
 - OAuth remains planned; current authentication uses bearer API keys.
 
 Each subsequent released fix will update this page with its actual outcome. Keep partial, failed and untested workflows distinct from working ones.

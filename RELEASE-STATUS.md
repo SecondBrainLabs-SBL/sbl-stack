@@ -1,4 +1,4 @@
-# Hosted MCP status — 29 September 2026
+# Hosted MCP status — 30 September 2026
 
 The hosted endpoint remains `https://mcp.sbl.so/mcp` and exposes all 30 original tool names plus the new archive tool. Tool availability is not proof that every workflow completes.
 
@@ -35,6 +35,13 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 - [Hosted Actions 36611070331](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36611070331) passed typecheck and focused tests, waited for ECS stability, and verified 0.2.7/31 tools on the public health endpoint. [Desktop Actions 36611084557](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36611084557) passed package and smoke checks and built byte-identical 599,097-byte MCPB/DXT files. Their SHA256 is `7d0e0ccb3a0fecdb385a2d2e11fecb9019eef85252ad9f099a1832c202ed9c7e`; Stack pin remains `92167c5bc59641e251e3ba020c2e87c3524947d8`.
 - Hosted archive behavior and fresh RUNNING queue drain have not yet been live-mutated on a safe owned fixture. No message, import or campaign launch occurred during this release. The app stop workflow's ECS completion is still unconfirmed independently because its Actions job starts deployments without waiting for stability.
 
+### Generated draft recovery — app released, MCP handoff pending
+
+- [App PR660](https://github.com/SecondBrainLabs-SBL/sbl-app/pull/660), reviewed at exact head `0af23156`, merged as `61b45ec59a728d66df45112cc299413e46e73c2b`. A caller-stable generation key now stores a receipt with the draft insert, serializes same-key creates and returns the original ID and pending fields after an ambiguous result. Reusing a key for a different brief returns a conflict. The unkeyed dashboard path is unchanged.
+- Focused type and recovery tests, lint and public-API build passed. [App Actions 36617432318](https://github.com/SecondBrainLabs-SBL/sbl-app/actions/runs/36617432318) succeeded for this `main` commit and started production ECS deployments. The workflow does not wait for ECS stability. Validation-only probes saw the new public API and a temporarily mixed client pool during rollout; later client probes all recognized the new key.
+- Company126 live check created keyed draft **8582**. Its first response included the ID and pending fields; same-key retry returned **8582** with `replayed: true` and identical pending fields. A changed brief with the same key returned HTTP 409. The draft remains CREATED and unarchived. Earlier draft **8581** was created while the old public API was still serving, returned only an ID and was deliberately not retried; it also remains CREATED. Neither draft was launched. The post-commit failure path is test-verified, not fault-injected live.
+- The current MCP create tool does not yet send the key, so its ambiguous retry path remains open until a separate MCP release. No MCP code or bundled guidance changed in this app-only release; v0.2.7 remains the current MCPB/DXT distribution.
+
 ## Verified live workflows
 
 - Sales Navigator extraction is now verified end to end with an eligible connected account: a bounded 100-lead founder search reached `succeeded`; the lead-list API reports 100 users added. The list remains attached to an unlaunched draft. The previous failure was provider HTTP 403 `errors/subscription_required` on an account without a Sales Navigator seat. Connecting an eligible account resolved this case without another code patch. Do not treat `queued` or `attached` as completed extraction.
@@ -45,7 +52,7 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 ## Still being verified or repaired
 
 - Campaign end state, notification and pending-message cleanup fixes have passed source checks and the app deployment workflow. The already-ended API path passed one owned-fixture check; a live RUNNING stop, queue drain and refund still need safe fixtures. Ending cannot recall messages already sent. The separate archive tool is deployed but its live mutation/readback remains unverified.
-- Campaign generation can return an error after creating a draft. Check the campaign list before retrying creation.
+- The app now recovers keyed generation and live same-key replay is verified. The current MCP create tool still omits the key; check the campaign list before retrying through MCP until its follow-up release.
 - Hosted CSV file handoff and complete conversation retrieval remain open. The live one-message thread read passed; this does not close pagination/completeness coverage.
 - MCP sender binding adds a sender; replacing one currently needs the dashboard to remove the previous sender. Moving a lead out of another active campaign also requires the app’s existing Merge action. These are workflow coverage gaps, not a reason to remove existing tools.
 - OAuth remains planned; current authentication uses bearer API keys.

@@ -43,4 +43,3 @@ Each subsequent released fix will update this page with its actual outcome. Keep
 ## Deployment policy
 
 Production SBL app branch is `main`, as declared in `sbl-app/branch-state.yml`. Subsequent production deployments must run through GitHub Actions, with the deployed source and outcome recorded here. The latest app and MCP releases above used Actions. The MCP repository now has separate manual Desktop bundle and hosted ECS deployment workflows; the app deployment workflow does not include the MCP service. The earlier MCP4 deployment preceded the Actions-only instruction.
-

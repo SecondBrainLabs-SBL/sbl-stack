@@ -23,6 +23,12 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 - App Actions [36590950456](https://github.com/SecondBrainLabs-SBL/sbl-app/actions/runs/36590950456) deployed source `b14934fa0141e91349962538ef053553db264b8e` to client604/public-api282/tasker414. Tasker rebuilt as an affected dependency. Hosted MCP Actions [36591557159](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36591557159) deployed MCP5. Desktop Actions [36590983991](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36590983991) built the downloadable artifacts.
 - Bundle SHA256: `3529830e41a6b2734fa1c65abdec0bd88db292e14196d39c48bab8838195d6f5`; both files are 597,614 bytes. Bundled Stack content is pinned to `92167c5bc59641e251e3ba020c2e87c3524947d8`.
 
+### Campaign stopping cleanup — deployment started
+
+- [App PR659](https://github.com/SecondBrainLabs-SBL/sbl-app/pull/659) makes ending a RUNNING campaign await cleanup of unclaimed queued outreach, scheduled WhatsApp jobs, smart followups and its owner’s lifecycle email sequence. An already ENDED retry repeats cleanup without another refund or end notification. Completed and responder-claimed messages remain visible; a send claimed before the stop may finish. Runner writes and lifecycle email scheduling coordinate with the stop transaction, and responders block new wire-send claims for ENDED campaigns.
+- Focused end/retry tests, four affected package typechecks, formatting, repository lint and docs checks passed. The DB-backed responder scenario was extended but was not run. Full repository typechecking remains blocked by missing generated WXT globals in the untouched extension checkout. The user approved PR659 at head `1708c4b` before merge.
+- [App Actions 36604326666](https://github.com/SecondBrainLabs-SBL/sbl-app/actions/runs/36604326666) succeeded on `main` source `39a87b4c8dc58402d12307fc4d6ac3b0b4283cd6`, including ECS deployment starts for client, campaigns-runner and message-responder. This workflow does not wait for ECS service stability; the local AWS session could not independently read rollout state. Read-only company126 API checks after the run found drafts 8578/8565 still CREATED and campaigns 8571/8573 still RUNNING. Owned campaign 7895 was already ENDED, had zero reported queued sends and no smart followups; one end retry returned HTTP 200, and readback remained ENDED with revision 2 and zero reported sends. This verifies the safe already-ended API path, not live queue drain or refund behavior. No campaign was archived, launched or imported.
+
 ## Verified live workflows
 
 - Sales Navigator extraction is now verified end to end with an eligible connected account: a bounded 100-lead founder search reached `succeeded`; the lead-list API reports 100 users added. The list remains attached to an unlaunched draft. The previous failure was provider HTTP 403 `errors/subscription_required` on an account without a Sales Navigator seat. Connecting an eligible account resolved this case without another code patch. Do not treat `queued` or `attached` as completed extraction.
@@ -32,7 +38,7 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 
 ## Still being verified or repaired
 
-- Campaign end state/notification fixes are deployed in the app. Complete pending-message cleanup remains a separate open repair; ending does not recall messages already sent.
+- Campaign end state, notification and pending-message cleanup fixes have passed source checks and the app deployment workflow. The already-ended API path passed one owned-fixture check; a live RUNNING stop, queue drain and refund still need safe fixtures. Ending cannot recall messages already sent. Archiving remains a separate operation and is still open.
 - Campaign generation can return an error after creating a draft. Check the campaign list before retrying creation.
 - Hosted CSV file handoff and complete conversation retrieval remain open. The live one-message thread read passed; this does not close pagination/completeness coverage.
 - MCP sender binding adds a sender; replacing one currently needs the dashboard to remove the previous sender. Moving a lead out of another active campaign also requires the app’s existing Merge action. These are workflow coverage gaps, not a reason to remove existing tools.

@@ -6,7 +6,7 @@
 
 Built on playbook data from **320,000+ delivered messages across 1,200+ campaigns.**
 
-The public v0.2.5 skill executes campaign creation, launch, replay, and end
+The public v0.2.6 skill executes campaign creation, launch, replay, and end
 orchestration for LinkedIn only. WhatsApp and iMessage may be discussed as
 unsupported, deferred concepts, but this release does not run their launch
 workflows.
@@ -38,15 +38,15 @@ SBL Stack is split into two pieces. Install both:
 **Step 1 — Install the sbl-mcp extension (tools)**
 
 1. Create your sbl.so API key at [SBL MCP settings](https://app.secondbrainlabs.com/mcp-server). Keep it out of chat, screenshots, logs, and plaintext documentation.
-2. Download [sbl-mcp-0.2.5.mcpb](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/download/v0.2.5/sbl-mcp-0.2.5.mcpb). Older clients can use the byte-identical [sbl-mcp-0.2.5.dxt](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/download/v0.2.5/sbl-mcp-0.2.5.dxt). Checksums and build provenance are on the [release page](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.5).
+2. Download [sbl-mcp-0.2.6.mcpb](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/download/v0.2.6/sbl-mcp-0.2.6.mcpb). Older clients can use the byte-identical [sbl-mcp-0.2.6.dxt](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/download/v0.2.6/sbl-mcp-0.2.6.dxt). Checksums and build provenance are on the [release page](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.6).
 3. In Claude Desktop, open **Settings → Extensions → Advanced settings → Install Extension** and select the bundle.
 4. The extension will prompt for two values: your **sbl.so API Key** (required — paste what you copied in step 1) and an optional **API URL** (leave the default `https://api.sbl.so` unless your account is on a non-prod environment). Click Install.
 
-> **No Python, Node, or other user-installed runtime needed.** v0.2.5 exposes
+> **No Python, Node, or other user-installed runtime needed.** v0.2.6 exposes
 > exactly 30 tools, including read-only LinkedIn sender discovery and
 > revision-protected sender binding.
 
-Upgrading from an older bundle? Install v0.2.5 through the same Extensions screen, confirm the installed version, and start a new chat. Each user should configure their own SBL API key. A hosted server update does not update a downloaded extension.
+Upgrading from an older bundle? Install v0.2.6 through the same Extensions screen, confirm the installed version, and start a new chat. Each user should configure their own SBL API key. A hosted server update does not update a downloaded extension.
 
 Try: **“List my SBL campaigns. Ask for my company ID if needed; do not change anything.”**
 
@@ -183,7 +183,7 @@ Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 | Tool | What it does |
 |------|--------------|
 | `sbl_create_campaign_from_prompt` | Generate a draft campaign from a natural-language prompt |
-| `sbl_update_campaign_component` | Edit one draft component: ICP, objective, messages, sequence, or smart follow-ups |
+| `sbl_update_campaign_component` | Edit one draft component: ICP, objective, messages, sequence, or smart follow-ups; message edits can retain the existing channel |
 | `sbl_create_retargeting_campaign` | Spin up a new draft targeting users from an existing campaign (by insight, purchase likelihood, or sentiment) |
 | `sbl_bind_linkedin_channel` | Bind an explicitly chosen sender to a CREATED draft using its current revision; never launches |
 
@@ -287,7 +287,7 @@ asset if your Claude build requires it) and restart the app.
 ## Stack
 
 - **Skills** — Claude Code markdown skill format
-- **MCP server** — `sbl-mcp` Desktop bundle 0.2.5, with a separately deployed hosted Streamable HTTP service. The current `.mcpb` bundle—and a verified legacy `.dxt` compatibility asset when provided—ships from this repo's [Releases](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases).
+- **MCP server** — `sbl-mcp` Desktop bundle 0.2.6, with a separately deployed hosted Streamable HTTP service. The current `.mcpb` bundle—and a verified legacy `.dxt` compatibility asset when provided—ships from this repo's [Releases](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases).
 - **API** — sbl.so public API
 
 ---

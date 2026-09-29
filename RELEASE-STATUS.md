@@ -1,17 +1,17 @@
 # Hosted MCP status — 29 September 2026
 
-The hosted endpoint remains `https://mcp.sbl.so/mcp` and exposes all 30 existing tool names. Tool availability is not proof that every workflow completes.
+The hosted endpoint remains `https://mcp.sbl.so/mcp` and exposes all 30 original tool names plus the new archive tool. Tool availability is not proof that every workflow completes.
 
 ## Released
 
-Latest MCP source `fba3ec202e556233c28a70c33fdc61d6dfda211b` is deployed as ECS `sbl-mcp:5` with image digest `sha256:67036a923ec076ba17031d7655dec232042fa780bd3aa07a899a8bc6d9c8032b`. Health reports **0.2.6 / 30 tools**. The earlier PR6–10 repair batch remains included.
+Latest MCP source `351ae4c5baf1b66ca636e20144160f04ab042cb6` was deployed through Actions with image digest `sha256:4555a1c1f01e5474ff6ea17431c71a879244922234de0d7e5ed3fe45e7a3714b`. The workflow waited for ECS stability and verified public health at **0.2.7 / 31 tools**. The earlier PR6–10 repair batch remains included.
 
 - Component editing publishes its required arguments and keeps strict branch validation. A hosted authenticated draft edit and readback passed; a stale revision returned a structured conflict without overwriting the draft.
 - Tool failures carry `isError` and structured categories. The deployed stale-revision check verified this behavior.
 - Request deadlines include response bodies; status polls honor their remaining budget. Malformed successful JSON and retargeting receipts without an identifier are rejected. These cases have regression evidence in MCP PRs #8–#10; they were not fault-injected into production.
 - The triage skill sends the accepted numeric-string status values (Stack PR #2).
 
-Reconnect your MCP client to refresh its tool catalog. Desktop users must install [v0.2.6](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.6) to receive the updated schema. Both MCPB and legacy DXT files contain all 30 tools and the `sbl`/`high-intent-outreach` prompts. Checksums and build provenance are included with the release.
+Reconnect your MCP client to refresh its tool catalog. Desktop users must install [v0.2.7](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.7) to receive the archive tool. Both MCPB and legacy DXT files contain all 31 tools and the `sbl`/`high-intent-outreach` prompts. Checksums and build provenance are included with the release.
 
 ### Message-component follow-up released
 
@@ -29,6 +29,12 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 - Focused end/retry tests, four affected package typechecks, formatting, repository lint and docs checks passed. The DB-backed responder scenario was extended but was not run. Full repository typechecking remains blocked by missing generated WXT globals in the untouched extension checkout. The user approved PR659 at head `1708c4b` before merge.
 - [App Actions 36604326666](https://github.com/SecondBrainLabs-SBL/sbl-app/actions/runs/36604326666) succeeded on `main` source `39a87b4c8dc58402d12307fc4d6ac3b0b4283cd6`, including ECS deployment starts for client, campaigns-runner and message-responder. This workflow does not wait for ECS service stability; the local AWS session could not independently read rollout state. Read-only company126 API checks after the run found drafts 8578/8565 still CREATED and campaigns 8571/8573 still RUNNING. Owned campaign 7895 was already ENDED, had zero reported queued sends and no smart followups; one end retry returned HTTP 200, and readback remained ENDED with revision 2 and zero reported sends. This verifies the safe already-ended API path, not live queue drain or refund behavior. No campaign was archived, launched or imported.
 
+### Archive tool released
+
+- [MCP PR13](https://github.com/SecondBrainLabs-SBL/sbl-mcp/pull/13) adds `sbl_archive_campaign`. It requires an owned, already ENDED campaign and explicit confirmation, retries stop cleanup before setting `isArchived`, and checks the readback. An active campaign must be ended separately. An already archived retry avoids a second archive update. Regression tests covered refusal, cleanup failure, success, readback and retry. The user approved exact PR head `2831e30` before merge.
+- [Hosted Actions 36611070331](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36611070331) passed typecheck and focused tests, waited for ECS stability, and verified 0.2.7/31 tools on the public health endpoint. [Desktop Actions 36611084557](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36611084557) passed package and smoke checks and built byte-identical 599,097-byte MCPB/DXT files. Their SHA256 is `7d0e0ccb3a0fecdb385a2d2e11fecb9019eef85252ad9f099a1832c202ed9c7e`; Stack pin remains `92167c5bc59641e251e3ba020c2e87c3524947d8`.
+- Hosted archive behavior and fresh RUNNING queue drain have not yet been live-mutated on a safe owned fixture. No message, import or campaign launch occurred during this release. The app stop workflow's ECS completion is still unconfirmed independently because its Actions job starts deployments without waiting for stability.
+
 ## Verified live workflows
 
 - Sales Navigator extraction is now verified end to end with an eligible connected account: a bounded 100-lead founder search reached `succeeded`; the lead-list API reports 100 users added. The list remains attached to an unlaunched draft. The previous failure was provider HTTP 403 `errors/subscription_required` on an account without a Sales Navigator seat. Connecting an eligible account resolved this case without another code patch. Do not treat `queued` or `attached` as completed extraction.
@@ -38,7 +44,7 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 
 ## Still being verified or repaired
 
-- Campaign end state, notification and pending-message cleanup fixes have passed source checks and the app deployment workflow. The already-ended API path passed one owned-fixture check; a live RUNNING stop, queue drain and refund still need safe fixtures. Ending cannot recall messages already sent. Archiving remains a separate operation and is still open.
+- Campaign end state, notification and pending-message cleanup fixes have passed source checks and the app deployment workflow. The already-ended API path passed one owned-fixture check; a live RUNNING stop, queue drain and refund still need safe fixtures. Ending cannot recall messages already sent. The separate archive tool is deployed but its live mutation/readback remains unverified.
 - Campaign generation can return an error after creating a draft. Check the campaign list before retrying creation.
 - Hosted CSV file handoff and complete conversation retrieval remain open. The live one-message thread read passed; this does not close pagination/completeness coverage.
 - MCP sender binding adds a sender; replacing one currently needs the dashboard to remove the previous sender. Moving a lead out of another active campaign also requires the app’s existing Merge action. These are workflow coverage gaps, not a reason to remove existing tools.

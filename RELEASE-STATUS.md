@@ -4,14 +4,14 @@ The hosted endpoint remains `https://mcp.sbl.so/mcp` and exposes all 30 original
 
 ## Released
 
-Latest MCP source `351ae4c5baf1b66ca636e20144160f04ab042cb6` was deployed through Actions with image digest `sha256:4555a1c1f01e5474ff6ea17431c71a879244922234de0d7e5ed3fe45e7a3714b`. The workflow waited for ECS stability and verified public health at **0.2.7 / 31 tools**. The earlier PR6–10 repair batch remains included.
+Latest MCP source `394b6369046ec08604ba1689ac6450cc59ce12e2` was deployed through [Hosted Actions 36621916489](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36621916489). The workflow waited for ECS stability and verified public health at **0.2.8 / 31 tools**. The earlier PR6–10 repair batch remains included.
 
 - Component editing publishes its required arguments and keeps strict branch validation. A hosted authenticated draft edit and readback passed; a stale revision returned a structured conflict without overwriting the draft.
 - Tool failures carry `isError` and structured categories. The deployed stale-revision check verified this behavior.
 - Request deadlines include response bodies; status polls honor their remaining budget. Malformed successful JSON and retargeting receipts without an identifier are rejected. These cases have regression evidence in MCP PRs #8–#10; they were not fault-injected into production.
 - The triage skill sends the accepted numeric-string status values (Stack PR #2).
 
-Reconnect your MCP client to refresh its tool catalog. Desktop users must install [v0.2.7](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.7) to receive the archive tool. Both MCPB and legacy DXT files contain all 31 tools and the `sbl`/`high-intent-outreach` prompts. Checksums and build provenance are included with the release.
+Reconnect your MCP client to refresh its tool catalog. Desktop users must install [v0.2.8](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.8) to receive the generation key. Both MCPB and legacy DXT files contain all 31 tools and the `sbl`/`high-intent-outreach` prompts. Checksums and build provenance are included with the release.
 
 ### Message-component follow-up released
 
@@ -35,12 +35,13 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 - [Hosted Actions 36611070331](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36611070331) passed typecheck and focused tests, waited for ECS stability, and verified 0.2.7/31 tools on the public health endpoint. [Desktop Actions 36611084557](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36611084557) passed package and smoke checks and built byte-identical 599,097-byte MCPB/DXT files. Their SHA256 is `7d0e0ccb3a0fecdb385a2d2e11fecb9019eef85252ad9f099a1832c202ed9c7e`; Stack pin remains `92167c5bc59641e251e3ba020c2e87c3524947d8`.
 - Hosted archive behavior and fresh RUNNING queue drain have not yet been live-mutated on a safe owned fixture. No message, import or campaign launch occurred during this release. The app stop workflow's ECS completion is still unconfirmed independently because its Actions job starts deployments without waiting for stability.
 
-### Generated draft recovery — app released, MCP handoff pending
+### Generated draft recovery released
 
 - [App PR660](https://github.com/SecondBrainLabs-SBL/sbl-app/pull/660), reviewed at exact head `0af23156`, merged as `61b45ec59a728d66df45112cc299413e46e73c2b`. A caller-stable generation key now stores a receipt with the draft insert, serializes same-key creates and returns the original ID and pending fields after an ambiguous result. Reusing a key for a different brief returns a conflict. The unkeyed dashboard path is unchanged.
 - Focused type and recovery tests, lint and public-API build passed. [App Actions 36617432318](https://github.com/SecondBrainLabs-SBL/sbl-app/actions/runs/36617432318) succeeded for this `main` commit and started production ECS deployments. The workflow does not wait for ECS stability. Validation-only probes saw the new public API and a temporarily mixed client pool during rollout; later client probes all recognized the new key.
 - Company126 live check created keyed draft **8582**. Its first response included the ID and pending fields; same-key retry returned **8582** with `replayed: true` and identical pending fields. A changed brief with the same key returned HTTP 409. The draft remains CREATED and unarchived. Earlier draft **8581** was created while the old public API was still serving, returned only an ID and was deliberately not retried; it also remains CREATED. Neither draft was launched. The post-commit failure path is test-verified, not fault-injected live.
-- The current MCP create tool does not yet send the key, so its ambiguous retry path remains open until a separate MCP release. No MCP code or bundled guidance changed in this app-only release; v0.2.7 remains the current MCPB/DXT distribution.
+- [MCP PR14](https://github.com/SecondBrainLabs-SBL/sbl-mcp/pull/14), reviewed at exact head `74545a5`, requires a caller-stable key on the existing create tool and forwards it to the app. It requires a draft ID before reporting success and retains pending fields. The original 30 tools remain. Focused generation contract, typecheck, package, smoke and local HTTP transport checks passed.
+- [Hosted Actions 36621916489](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36621916489) deployed v0.2.8 and waited for ECS stability; public health returned 0.2.8/31. A live hosted MCP call with draft 8582's saved key and identical brief returned **8582**, `replayed: true` and the same pending fields. It created no second draft. [Desktop Actions 36621950004](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36621950004) built byte-identical 599,609-byte MCPB/DXT files, SHA256 `3c319db3a7f3da414589b1bcf8f660d0741560a375a4d54226d7ecb3b95a1424`, published as [v0.2.8](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.8). The post-commit failure path was test-injected locally, not in production.
 
 ## Verified live workflows
 
@@ -52,7 +53,7 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 ## Still being verified or repaired
 
 - Campaign end state, notification and pending-message cleanup fixes have passed source checks and the app deployment workflow. The already-ended API path passed one owned-fixture check; a live RUNNING stop, queue drain and refund still need safe fixtures. Ending cannot recall messages already sent. The separate archive tool is deployed but its live mutation/readback remains unverified.
-- The app now recovers keyed generation and live same-key replay is verified. The current MCP create tool still omits the key; check the campaign list before retrying through MCP until its follow-up release.
+- Keyed generation now replays the same draft through hosted MCP. Callers must persist and reuse the exact key and brief; old unkeyed draft 8581 was not retried. The post-commit failure path remains locally tested only.
 - Hosted CSV file handoff and complete conversation retrieval remain open. The live one-message thread read passed; this does not close pagination/completeness coverage.
 - MCP sender binding adds a sender; replacing one currently needs the dashboard to remove the previous sender. Moving a lead out of another active campaign also requires the app’s existing Merge action. These are workflow coverage gaps, not a reason to remove existing tools.
 - OAuth remains planned; current authentication uses bearer API keys.

@@ -36,7 +36,7 @@ If not set, ask for it.
 
 Call `sbl_list_campaigns` MCP tool with:
 - `company_id`: from Step 0
-- `statuses`: ["RUNNING", "SENDING_INITIAL_MESSAGES", "RESENDING_INITIAL_MESSAGES", "SENDING_INITIAL_MESSAGE_FOLLOWUPS"]
+- `statuses`: ["7", "4", "5", "6"]
 - `response_format`: "json"
 
 Show a brief table of active campaigns (name, ID, channel).

@@ -68,6 +68,8 @@ No server download is needed. The hosted endpoint is
 **`https://mcp.sbl.so/mcp`**. Supply the bearer key through a client environment
 variable or secret store; never paste it into chat or commit it to configuration.
 
+The hosted endpoint received the September 29 repair batch. See [current hosted status](RELEASE-STATUS.md) for verified behavior and remaining limitations. Existing downloaded MCP bundles are a separate distribution and are not updated by a server deployment.
+
 Create or revoke the key at
 [SBL MCP settings](https://app.secondbrainlabs.com/mcp-server).
 

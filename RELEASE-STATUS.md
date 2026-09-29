@@ -33,3 +33,9 @@ Each subsequent released fix will update this page with its actual outcome. Keep
 ## Deployment policy
 
 Production SBL app branch is `main`, as declared in `sbl-app/branch-state.yml`. Subsequent production deployments must run through GitHub Actions, with the deployed source and outcome recorded here. The hosted MCP revision above was deployed before that instruction. The separate MCP repository has a Desktop bundle build workflow but no hosted deployment workflow; the app deployment workflow does not include the MCP service.
+
+## Prepared component follow-up (not deployed)
+
+MCP PR12 prepares v0.2.6: text-only message edits can omit the channel; the companion app patch reads the owned campaign’s existing channel without replacing the caller revision. Drafts can save messages before configuring invitation text; standard launch keeps the invitation-policy check. A draft without a configured channel receives a field-specific error.
+
+Independent review, Actions deployment, live company126 draft readback, and v0.2.6 bundle publication are pending. v0.2.5 remains the current customer download until these gates pass. No new messages or imports are part of this repair.

@@ -4,14 +4,14 @@ The hosted endpoint remains `https://mcp.sbl.so/mcp` and exposes all 30 original
 
 ## Released
 
-Latest MCP source `394b6369046ec08604ba1689ac6450cc59ce12e2` was deployed through [Hosted Actions 36621916489](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36621916489). The workflow waited for ECS stability and verified public health at **0.2.8 / 31 tools**. The earlier PR6–10 repair batch remains included.
+Latest MCP source `2ca181392be2c4ee2dbcee6d4543e043df882f9a` was deployed through [Hosted Actions 36624539693](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36624539693). The workflow waited for ECS stability and verified public health at **0.2.9 / 31 tools**. The earlier PR6–10 repair batch remains included.
 
 - Component editing publishes its required arguments and keeps strict branch validation. A hosted authenticated draft edit and readback passed; a stale revision returned a structured conflict without overwriting the draft.
 - Tool failures carry `isError` and structured categories. The deployed stale-revision check verified this behavior.
 - Request deadlines include response bodies; status polls honor their remaining budget. Malformed successful JSON and retargeting receipts without an identifier are rejected. These cases have regression evidence in MCP PRs #8–#10; they were not fault-injected into production.
 - The triage skill sends the accepted numeric-string status values (Stack PR #2).
 
-Reconnect your MCP client to refresh its tool catalog. Desktop users must install [v0.2.8](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.8) to receive the generation key. Both MCPB and legacy DXT files contain all 31 tools and the `sbl`/`high-intent-outreach` prompts. Checksums and build provenance are included with the release.
+Reconnect your MCP client to refresh its tool catalog. Desktop users must install [v0.2.9](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.9) to receive the hosted CSV handoff. Both MCPB and legacy DXT files contain all 31 tools and the `sbl`/`high-intent-outreach` prompts. Checksums and build provenance are included with the release.
 
 ### Message-component follow-up released
 
@@ -43,6 +43,12 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 - [MCP PR14](https://github.com/SecondBrainLabs-SBL/sbl-mcp/pull/14), reviewed at exact head `74545a5`, requires a caller-stable key on the existing create tool and forwards it to the app. It requires a draft ID before reporting success and retains pending fields. The original 30 tools remain. Focused generation contract, typecheck, package, smoke and local HTTP transport checks passed.
 - [Hosted Actions 36621916489](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36621916489) deployed v0.2.8 and waited for ECS stability; public health returned 0.2.8/31. A live hosted MCP call with draft 8582's saved key and identical brief returned **8582**, `replayed: true` and the same pending fields. It created no second draft. [Desktop Actions 36621950004](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36621950004) built byte-identical 599,609-byte MCPB/DXT files, SHA256 `3c319db3a7f3da414589b1bcf8f660d0741560a375a4d54226d7ecb3b95a1424`, published as [v0.2.8](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.8). The post-commit failure path was test-injected locally, not in production.
 
+### Hosted CSV handoff released
+
+- [MCP PR15](https://github.com/SecondBrainLabs-SBL/sbl-mcp/pull/15), reviewed by Ayush at exact head `3dc2783`, extends the existing upload tool. Hosted callers omit `file_path` to receive the campaign-bound presigned S3 POST target and upload bytes from their own machine before starting the existing durable import job. Hosted paths return actionable guidance; Desktop local-path uploads still work. The backend checks campaign ownership and binding expiry; the S3 policy limits the upload to 20 MiB and a `.csv` object key; the existing worker validates rows. No new worker or tool name was added.
+- Focused hosted HTTP, Desktop parity, unsafe/expired target, P2 import, typecheck, package and smoke checks passed. [Hosted Actions 36624539693](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36624539693) waited for ECS stability and verified public health **0.2.9/31**. [Desktop Actions 36624588189](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36624588189) built byte-identical 600,389-byte MCPB/DXT files, SHA256 `49adf8cac9aa0754f40ae267254e629214487875c6c52df3a3917d1c53daa80e`, published as [v0.2.9](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.9).
+- Live company126 test used owned unlaunched draft **8582**. Hosted path input was rejected before any upload. A separate client process uploaded a 79-byte synthetic CSV through the presigned target; S3 returned 204. The import job `59f2e4be-bfff-492d-ad20-7960cc44bac6` succeeded with **1 inserted, 1 invalid** row. Replaying the saved operation returned the same job with `replayed: true` and unchanged counts. Campaign user readback found exactly one matching QA lead; draft8582 remained CREATED, unarchived, with zero queued/delivered messages. No campaign was launched or message sent.
+
 ## Verified live workflows
 
 - Sales Navigator extraction is now verified end to end with an eligible connected account: a bounded 100-lead founder search reached `succeeded`; the lead-list API reports 100 users added. The list remains attached to an unlaunched draft. The previous failure was provider HTTP 403 `errors/subscription_required` on an account without a Sales Navigator seat. Connecting an eligible account resolved this case without another code patch. Do not treat `queued` or `attached` as completed extraction.
@@ -54,7 +60,7 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 
 - Campaign end state, notification and pending-message cleanup fixes have passed source checks and the app deployment workflow. The already-ended API path passed one owned-fixture check; a live RUNNING stop, queue drain and refund still need safe fixtures. Ending cannot recall messages already sent. The separate archive tool is deployed but its live mutation/readback remains unverified.
 - Keyed generation now replays the same draft through hosted MCP. Callers must persist and reuse the exact key and brief; old unkeyed draft 8581 was not retried. The post-commit failure path remains locally tested only.
-- Hosted CSV file handoff and complete conversation retrieval remain open. The live one-message thread read passed; this does not close pagination/completeness coverage.
+- Hosted CSV upload/import handoff is verified on one synthetic company126 fixture; broader client compatibility and data shapes remain untested. Complete conversation retrieval remains open. The live one-message thread read passed; this does not close pagination/completeness coverage.
 - MCP sender binding adds a sender; replacing one currently needs the dashboard to remove the previous sender. Moving a lead out of another active campaign also requires the app’s existing Merge action. These are workflow coverage gaps, not a reason to remove existing tools.
 - OAuth remains planned; current authentication uses bearer API keys.
 

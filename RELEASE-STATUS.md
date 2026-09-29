@@ -11,7 +11,7 @@ MCP source `0eb6e88cf13582289838f25bc7b0e8a2bdbaa465` is deployed as ECS `sbl-mc
 - Request deadlines include response bodies; status polls honor their remaining budget. Malformed successful JSON and retargeting receipts without an identifier are rejected. These cases have regression evidence in MCP PRs #8–#10; they were not fault-injected into production.
 - The triage skill sends the accepted numeric-string status values (Stack PR #2).
 
-Reconnect your MCP client to refresh its tool catalog. The existing downloadable v0.2.3 MCP bundle has not been rebuilt by this hosted deployment. Health still reports version 0.2.3; use the source/image identity above to distinguish this hosted repair batch.
+Reconnect your MCP client to refresh its tool catalog. Desktop bundle v0.2.5 separately packages these merged MCP repairs, all 30 tools, and the `sbl`/`high-intent-outreach` prompts. Download both supported bundle formats from the [v0.2.5 release](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.5); its checksums and provenance identify the actual build. [MCP PR #11](https://github.com/SecondBrainLabs-SBL/sbl-mcp/pull/11) adds the versioned package metadata and manual Actions build; the release uses MCP source `4798a7bb990457365ce44fb67735917ec37dbeb8` and Stack content `92167c5bc59641e251e3ba020c2e87c3524947d8`. Existing users must install the new bundle to receive the repairs. Health still reports version 0.2.3; use the source/image identity above to distinguish this hosted repair batch.
 
 ## Verified live workflows
 
@@ -32,4 +32,4 @@ Each subsequent released fix will update this page with its actual outcome. Keep
 
 ## Deployment policy
 
-Production SBL app branch is `main`, as declared in `sbl-app/branch-state.yml`. Subsequent production deployments must run through GitHub Actions, with the deployed source and outcome recorded here. The hosted MCP revision above was deployed before that instruction. The separate MCP repository currently has no deployment workflow; the app deployment workflow does not include the MCP service.
+Production SBL app branch is `main`, as declared in `sbl-app/branch-state.yml`. Subsequent production deployments must run through GitHub Actions, with the deployed source and outcome recorded here. The hosted MCP revision above was deployed before that instruction. The separate MCP repository has a Desktop bundle build workflow but no hosted deployment workflow; the app deployment workflow does not include the MCP service.

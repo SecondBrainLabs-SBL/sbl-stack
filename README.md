@@ -69,7 +69,21 @@ controlled-launch checklist in `sbl/SKILL_MCP.md`.
 ### Option B — Remote MCP URL (beta) — Claude Code, Codex, n8n, API 🌐
 
 No server download is needed. The hosted endpoint is
-**`https://mcp.sbl.so/mcp`**. Supply the bearer key through a client environment
+**`https://mcp.sbl.so/mcp`**. It supports **OAuth sign-in** (recommended, no API key)
+and bearer API keys.
+
+#### Sign in with OAuth (recommended)
+
+- **claude.ai / Claude Desktop:** Settings → Connectors → **Add custom connector** → URL `https://mcp.sbl.so/mcp` → sign in to SBL → choose a company → **Approve**.
+- **Claude Code:** run `claude mcp add --transport http sbl https://mcp.sbl.so/mcp`, then `/mcp` → `sbl` → **Authenticate**.
+
+Each connection is bound to **one company**, chosen on the consent screen. To use another company, disconnect and reconnect, choosing that company. Known issues: companies with identical names are not yet distinguished in the picker ([sbl-app#668](https://github.com/SecondBrainLabs-SBL/sbl-app/issues/668)), and a company mismatch returns an unclear error ([sbl-mcp#19](https://github.com/SecondBrainLabs-SBL/sbl-mcp/issues/19)).
+
+To disconnect, open the SBL dashboard → MCP server page → **Connected apps** → **Disconnect**; access is revoked immediately. Access tokens last 1 hour and refresh automatically; refresh tokens last 30 days. See [hosted status](RELEASE-STATUS.md) for what was verified.
+
+#### Use an API key instead
+
+Supply the bearer key through a client environment
 variable or secret store; never paste it into chat or commit it to configuration.
 
 The hosted endpoint received the September 29 repair batch. See [current hosted status](RELEASE-STATUS.md) for verified behavior and remaining limitations. Existing downloaded MCP bundles are a separate distribution and are not updated by a server deployment.
@@ -118,9 +132,8 @@ or secret expression; do not place the key directly in the workflow.
 Configure a URL-type MCP server at `https://mcp.sbl.so/mcp` and load its
 authorization token from your application's secret manager at runtime.
 
-> **Note:** this bearer-key endpoint does not yet support the authenticated
-> claude.ai web connector setup; SBL OAuth is still pending. Use the Claude Desktop MCP Bundle or another local MCP
-> client.
+> **Note:** API-key setup and the Claude Desktop MCP Bundle (Option A) are unchanged
+> and still work. Use OAuth above for claude.ai web connectors.
 
 ---
 

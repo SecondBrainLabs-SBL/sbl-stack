@@ -42,7 +42,7 @@ echo "Installed: sbl, sbl-create, sbl-optimize, sbl-triage, sbl-playbook, sbl-re
 echo ""
 echo "Hosted MCP: https://mcp.sbl.so/mcp"
 echo "API keys:   https://app.secondbrainlabs.com/mcp-server"
-echo ""
+echo "OAuth (no API key): claude mcp add --transport http sbl https://mcp.sbl.so/mcp, then /mcp -> sbl -> Authenticate"echo ""
 echo "This script deliberately did not request, print, or persist your API key."
 echo "Set SBL_API_KEY in the environment or secret manager used to start Claude Code."
 echo "Then configure the hosted server using an environment-variable reference:"

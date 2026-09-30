@@ -1,17 +1,17 @@
 # Hosted MCP status — 30 September 2026
 
-The hosted endpoint remains `https://mcp.sbl.so/mcp` and exposes all 30 original tool names plus the new archive tool. Tool availability is not proof that every workflow completes.
+The hosted endpoint remains `https://mcp.sbl.so/mcp` and exposes all 30 original tool names plus archive and LinkedIn sender control (32 total). Tool availability is not proof that every workflow completes.
 
 ## Released
 
-Latest MCP source `2ca181392be2c4ee2dbcee6d4543e043df882f9a` was deployed through [Hosted Actions 36624539693](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36624539693). The workflow waited for ECS stability and verified public health at **0.2.9 / 31 tools**. The earlier PR6–10 repair batch remains included.
+Latest MCP source `783d0fbf03858b80f8142cc30f9f28f589c9af33` was deployed through [Hosted Actions 36660983976](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36660983976). The workflow waited for ECS stability and verified public health at **0.2.10 / 32 tools**. The earlier PR6–10 repair batch remains included.
 
 - Component editing publishes its required arguments and keeps strict branch validation. A hosted authenticated draft edit and readback passed; a stale revision returned a structured conflict without overwriting the draft.
 - Tool failures carry `isError` and structured categories. The deployed stale-revision check verified this behavior.
 - Request deadlines include response bodies; status polls honor their remaining budget. Malformed successful JSON and retargeting receipts without an identifier are rejected. These cases have regression evidence in MCP PRs #8–#10; they were not fault-injected into production.
 - The triage skill sends the accepted numeric-string status values (Stack PR #2).
 
-Reconnect your MCP client to refresh its tool catalog. Desktop users must install [v0.2.9](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.9) to receive the hosted CSV handoff. Both MCPB and legacy DXT files contain all 31 tools and the `sbl`/`high-intent-outreach` prompts. Checksums and build provenance are included with the release.
+Reconnect your MCP client to refresh its tool catalog. Desktop users must install [v0.2.10](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.10) to receive the sender control. Both MCPB and legacy DXT files contain all 32 tools and the `sbl`/`high-intent-outreach` prompts. Checksums and build provenance are included with the release.
 
 ### Message-component follow-up released
 
@@ -52,7 +52,13 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 ### LinkedIn sender app control released
 
 - [App PR661](https://github.com/SecondBrainLabs-SBL/sbl-app/pull/661), independently approved at exact head `9c0613f0`, merged as `18f55db775f79829a276648582dd0f298406aa23`. The public API now accepts a confirmed sender replacement/removal for an owned LinkedIn campaign, checks the caller's revision/status/current sender list and connected company senders, then reuses the dashboard's existing internal operation. A same-list retry skips the write; the response confirms the resulting list. Five focused tests, public-api typecheck, and the Genesis gate passed.
-- [App Actions 36628453973](https://github.com/SecondBrainLabs-SBL/sbl-app/actions/runs/36628453973) succeeded on production `main`; the app workflow starts ECS deployment but does not wait for service stability. After rollout, the new route returned its validation response. Live company126 CREATED draft **8578** added sender1469, replayed the same list without a write, replaced it with1477, then removed all senders. Final readback: CREATED, unarchived, revision2, no senders, zero queued/delivered messages. No launch or send. The MCP tool that exposes this control is still pending.
+- [App Actions 36628453973](https://github.com/SecondBrainLabs-SBL/sbl-app/actions/runs/36628453973) succeeded on production `main`; the app workflow starts ECS deployment but does not wait for service stability. After rollout, the new route returned its validation response. Live company126 CREATED draft **8578** added sender1469, replayed the same list without a write, replaced it with1477, then removed all senders. Final readback: CREATED, unarchived, revision2, no senders, zero queued/delivered messages. No launch or send.
+
+### LinkedIn sender MCP control and campaign lifecycle live checks
+
+- [MCP PR16](https://github.com/SecondBrainLabs-SBL/sbl-mcp/pull/16), approved by Ayush at exact head `2afd8c7`, adds `sbl_update_linkedin_campaign_senders` using the deployed app operation. The tool requires the current campaign snapshot and confirmation, rejects disconnected senders, and reports same-list replay without a second write. [Hosted Actions 36660983976](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36660983976) passed focused gates, waited for ECS stability, and verified 0.2.10/32 tools. [Desktop Actions 36660992325](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36660992325) built byte-identical 606,821-byte MCPB/DXT files, SHA256 `a6e3729f44d72d30adc396700e6789a87df2f65cfddf5a7c09828cd9e1c17850`. Anonymous [v0.2.10](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.10) downloads matched Actions and their checksums. The bundle pins Stack source `d1b12ead8bae046d187f74f1d5d68db20d4a1140`.
+- Company126 unlaunched draft **8594** had zero users and selected only all users from empty audit source **8539**. Hosted MCP sender calls added channel1469, replayed the same list without a write, replaced it with1477, removed all, then restored1477. Every readback matched; revision stayed1 and sends stayed zero. Draft8594 then reached RUNNING revision2 with no users, initiated, queued or delivered messages. `sbl_end_campaign` returned200 and readback ENDED; its retry stayed ENDED with zero sends. `sbl_archive_campaign` set `isArchived:true` on 8594. Separately, already ENDED owned campaign **7895** archived successfully and an archive retry reported `alreadyArchived:true`; its revision2 and zero sends stayed unchanged.
+- These live checks prove the empty RUNNING stop and archive paths. They do not prove draining a nonempty message queue, billing refund or notification count on retries. Those need a safe queued fixture. Protected campaigns8571/8573/8578 and imported draft8565 were not changed during these checks. Clone8591 of empty ended campaign7895 was left CREATED and unlaunched because its inherited comment-to-DM configuration made it unsuitable for this test.
 
 ## Verified live workflows
 
@@ -63,11 +69,11 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 
 ## Still being verified or repaired
 
-- Campaign end state, notification and pending-message cleanup fixes have passed source checks and the app deployment workflow. The already-ended API path passed one owned-fixture check; a live RUNNING stop, queue drain and refund still need safe fixtures. Ending cannot recall messages already sent. The separate archive tool is deployed but its live mutation/readback remains unverified.
-- Keyed generation now replays the same draft through hosted MCP. Callers must persist and reuse the exact key and brief; old unkeyed draft 8581 was not retried. The post-commit failure path remains locally tested only.
+- Campaign end state, notification and pending-message cleanup fixes have passed source checks and the app deployment workflow. An empty RUNNING stop, ENDED retry and archive mutation passed live on owned campaign8594; nonempty queue drain, refund and notification counts still need a safe fixture. Ending cannot recall messages already sent. The app stop workflow's ECS completion remains unconfirmed independently because its Actions job starts deployments without waiting for stability.
+- Keyed generation replays the same draft through hosted MCP. Callers must persist and reuse the exact key and brief; old unkeyed draft8581 was not retried. The post-commit failure path remains locally tested only. A separate empty-fixture generation attempt on 30 September returned HTTP500 twice through MCP and once through the public API with the same key; no new draft appeared in the company126 campaign list. The cause remains untriaged, and a different key was not attempted for that brief.
 - Hosted CSV upload/import handoff is verified on one synthetic company126 fixture; broader client compatibility and data shapes remain untested. Complete conversation retrieval remains open. The live one-message thread read passed; this does not close pagination/completeness coverage.
-- The app sender replacement/removal endpoint is deployed and live-verified, but MCP still needs a narrow tool to call it. Moving a lead out of another active campaign still requires the app's existing Merge action. These are workflow coverage gaps, not a reason to remove existing tools.
-- OAuth remains planned; current authentication uses bearer API keys.
+- The app and MCP sender replacement/removal controls are deployed and live-verified. Moving a lead out of another active campaign still requires the app's existing Merge action.
+- OAuth is being built in separate app/MCP PRs; the released hosted endpoint still uses bearer API keys.
 
 Each subsequent released fix will update this page with its actual outcome. Keep partial, failed and untested workflows distinct from working ones.
 

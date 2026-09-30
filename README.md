@@ -99,8 +99,8 @@ claude mcp add --scope user --transport http sbl https://mcp.sbl.so/mcp \
 ```
 
 Keep the literal `${SBL_API_KEY}` reference and set the value in the environment or
-secret manager that starts Claude Code. Restart Claude Code and verify exactly 32
-`sbl_*` tools. Optionally install the `/sbl` skills:
+secret manager that starts Claude Code. Restart Claude Code and verify at least the 30 original
+`sbl_*` tools (health reports 0.2.11 / 32 tools on current hosted). Optionally install the `/sbl` skills:
 
 ```bash
 git clone https://github.com/SecondBrainLabs-SBL/sbl-stack && cd sbl-stack && ./setup
@@ -180,7 +180,7 @@ Reload your terminal (`source ~/.zshrc`) and you're set.
 
 ## The tools (32)
 
-The tables below list the 30 original tools; hosted 0.2.11 adds `sbl_archive_campaign` and a LinkedIn sender update tool.
+The 30 original tools are listed first; the last two rows exist on hosted 0.2.11 (32 tools) only. The Desktop bundle 0.2.6 has 30 tools.
 
 Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 
@@ -201,12 +201,14 @@ Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 | `sbl_update_campaign_component` | Edit one draft component: ICP, objective, messages, sequence, or smart follow-ups; message edits can retain the existing channel |
 | `sbl_create_retargeting_campaign` | Spin up a new draft targeting users from an existing campaign (by insight, purchase likelihood, or sentiment) |
 | `sbl_bind_linkedin_channel` | Bind an explicitly chosen sender to a CREATED draft using its current revision; never launches |
+| `sbl_update_linkedin_campaign_senders` | Replace or remove senders on an owned LinkedIn campaign using its current revision; never launches or sends (hosted 0.2.11 only) |
 
 ### Campaign lifecycle
 | Tool | What it does |
 |------|--------------|
 | `sbl_run_campaign` | Launch a draft campaign (requires your explicit approval) |
 | `sbl_end_campaign` | End a running campaign |
+| `sbl_archive_campaign` | Archive an owned, already ENDED campaign after confirmation (hosted 0.2.11 only) |
 
 ### Messaging & human intervention
 | Tool | What it does |

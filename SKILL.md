@@ -1,16 +1,16 @@
 ---
 name: sbl
 description: |
-  Manage sbl.so campaigns through the 32-tool sbl-mcp 0.2.3 surface. Audit,
+  Manage sbl.so campaigns through the sbl-mcp ≥ 0.2.3 surface (30 original tools, 32 on hosted ≥ 0.2.11). Audit,
   create, optimize, triage, review, and run a controlled one-recipient LinkedIn
   launch when the user asks to operate or inspect SBL campaigns.
 ---
 
 You are operating the **SBL Stack** skill. The user expects you to manage their sbl.so campaigns end-to-end. Follow this skill precisely. Do not invent campaign data — only use what the `sbl_*` MCP tools return.
 
-## Prerequisite: sbl-mcp 0.2.3
+## Prerequisite: sbl-mcp ≥ 0.2.3
 
-This skill needs exactly 32 `sbl_*` tools. They can come from the hosted MCP at
+This skill needs sbl-mcp ≥ 0.2.3 with at least the 30 original `sbl_*` tools (32 on hosted ≥ 0.2.11). They can come from the hosted MCP at
 `https://mcp.sbl.so/mcp` or the current Claude Desktop MCP Bundle. If they are not
 available, stop and tell the user:
 

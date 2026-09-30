@@ -1,6 +1,6 @@
 # SBL Stack
 
-> Your AI campaign manager for [sbl.so](https://sbl.so) — 30 MCP tools plus the `sbl` and
+> Your AI campaign manager for [sbl.so](https://sbl.so) — 32 MCP tools plus the `sbl` and
 > `high-intent-outreach` prompts for audit, creation, triage, and a
 > controlled one-recipient launch.
 
@@ -69,7 +69,21 @@ controlled-launch checklist in `sbl/SKILL_MCP.md`.
 ### Option B — Remote MCP URL (beta) — Claude Code, Codex, n8n, API 🌐
 
 No server download is needed. The hosted endpoint is
-**`https://mcp.sbl.so/mcp`**. Supply the bearer key through a client environment
+**`https://mcp.sbl.so/mcp`**. It supports **OAuth sign-in** (recommended, no API key)
+and bearer API keys.
+
+#### Sign in with OAuth (recommended)
+
+- **claude.ai / Claude Desktop:** Settings → Connectors → **Add custom connector** → URL `https://mcp.sbl.so/mcp` → sign in to SBL → choose a company → **Approve**.
+- **Claude Code:** run `claude mcp add --transport http sbl https://mcp.sbl.so/mcp`, then `/mcp` → `sbl` → **Authenticate**.
+
+Each connection is bound to **one company**, chosen on the consent screen. To use another company, disconnect and reconnect, choosing that company. Known issues: companies with identical names are not yet distinguished in the picker ([sbl-app#668](https://github.com/SecondBrainLabs-SBL/sbl-app/issues/668)), and a company mismatch returns an unclear error ([sbl-mcp#19](https://github.com/SecondBrainLabs-SBL/sbl-mcp/issues/19)).
+
+To disconnect, open the SBL dashboard → MCP server page → **Connected apps** → **Disconnect**; access is revoked immediately. Access tokens last 1 hour and refresh automatically; refresh tokens last 30 days. See [hosted status](RELEASE-STATUS.md) for what was verified.
+
+#### Use an API key instead
+
+Supply the bearer key through a client environment
 variable or secret store; never paste it into chat or commit it to configuration.
 
 The hosted endpoint received the September 29 repair batch. See [current hosted status](RELEASE-STATUS.md) for verified behavior and remaining limitations. Existing downloaded MCP bundles are a separate distribution and are not updated by a server deployment.
@@ -85,8 +99,8 @@ claude mcp add --scope user --transport http sbl https://mcp.sbl.so/mcp \
 ```
 
 Keep the literal `${SBL_API_KEY}` reference and set the value in the environment or
-secret manager that starts Claude Code. Restart Claude Code and verify exactly 30
-`sbl_*` tools. Optionally install the `/sbl` skills:
+secret manager that starts Claude Code. Restart Claude Code and verify at least the 30 original
+`sbl_*` tools (health reports 0.2.11 / 32 tools on current hosted). Optionally install the `/sbl` skills:
 
 ```bash
 git clone https://github.com/SecondBrainLabs-SBL/sbl-stack && cd sbl-stack && ./setup
@@ -118,9 +132,8 @@ or secret expression; do not place the key directly in the workflow.
 Configure a URL-type MCP server at `https://mcp.sbl.so/mcp` and load its
 authorization token from your application's secret manager at runtime.
 
-> **Note:** this bearer-key endpoint does not yet support the authenticated
-> claude.ai web connector setup; SBL OAuth is still pending. Use the Claude Desktop MCP Bundle or another local MCP
-> client.
+> **Note:** API-key setup and the Claude Desktop MCP Bundle (Option A) are unchanged
+> and still work. Use OAuth above for claude.ai web connectors.
 
 ---
 
@@ -165,7 +178,9 @@ Reload your terminal (`source ~/.zshrc`) and you're set.
 
 ---
 
-## The tools (30)
+## The tools (32)
+
+The 30 original tools are listed first; the last two rows exist on hosted 0.2.11 (32 tools) only. The Desktop bundle 0.2.6 has 30 tools.
 
 Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 
@@ -186,12 +201,14 @@ Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 | `sbl_update_campaign_component` | Edit one draft component: ICP, objective, messages, sequence, or smart follow-ups; message edits can retain the existing channel |
 | `sbl_create_retargeting_campaign` | Spin up a new draft targeting users from an existing campaign (by insight, purchase likelihood, or sentiment) |
 | `sbl_bind_linkedin_channel` | Bind an explicitly chosen sender to a CREATED draft using its current revision; never launches |
+| `sbl_update_linkedin_campaign_senders` | Replace or remove senders on an owned LinkedIn campaign using its current revision; never launches or sends (hosted 0.2.11 only) |
 
 ### Campaign lifecycle
 | Tool | What it does |
 |------|--------------|
 | `sbl_run_campaign` | Launch a draft campaign (requires your explicit approval) |
 | `sbl_end_campaign` | End a running campaign |
+| `sbl_archive_campaign` | Archive an owned, already ENDED campaign after confirmation (hosted 0.2.11 only) |
 
 ### Messaging & human intervention
 | Tool | What it does |

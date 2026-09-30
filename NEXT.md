@@ -17,13 +17,6 @@ The MCP Bundle exposes one packaged orchestration prompt named `sbl`.
 
 ## Next priorities
 
-### OAuth for hosted web connectors
-
-Add MCP OAuth 2.1 protected-resource metadata, authorization discovery, resource
-binding, and tool-level security schemes before offering the hosted endpoint in
-web connector directories. Bearer API keys remain a local-client integration and
-must never be pasted into chat.
-
 ### MCP Bundle distribution
 
 Validate the current `.mcpb` package on clean Claude Desktop installs and retain a

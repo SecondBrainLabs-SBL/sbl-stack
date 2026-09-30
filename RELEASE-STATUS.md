@@ -4,6 +4,19 @@ The hosted endpoint remains `https://mcp.sbl.so/mcp` and exposes all 30 original
 
 ## Released
 
+### Hosted MCP OAuth sign-in (0.2.11) — 30 September 2026
+
+`https://mcp.sbl.so/mcp` now supports OAuth sign-in alongside bearer API keys. Health reports **0.2.11 / 32 tools**.
+
+- MCP: [PR17](https://github.com/SecondBrainLabs-SBL/sbl-mcp/pull/17) merged as `15993724`; [Hosted Actions 36669844147](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36669844147).
+- App: [PR662](https://github.com/SecondBrainLabs-SBL/sbl-app/pull/662) (authorization server) merged as `10f92c31`, prod deploy [Actions 36669210040](https://github.com/SecondBrainLabs-SBL/sbl-app/actions/runs/36669210040); [PR663](https://github.com/SecondBrainLabs-SBL/sbl-app/pull/663) (consent page and Connected apps) merged as `2c038490`, [Actions 36669771363](https://github.com/SecondBrainLabs-SBL/sbl-app/actions/runs/36669771363). Prod DB migration `0263_mcp_oauth`.
+- Each connection is bound to one company chosen on the consent screen. Disconnect under Connected apps revokes immediately. Access tokens last 1 hour; refresh tokens 30 days. Setup steps are in the [README](README.md).
+- API-key setup and Desktop MCPB/DXT bundles work unchanged. Desktop bundles were not republished; the latest published bundle is the one listed above.
+- Known issues: identical company names are not distinguished in the picker ([sbl-app#668](https://github.com/SecondBrainLabs-SBL/sbl-app/issues/668)); unclear error on company mismatch ([sbl-mcp#19](https://github.com/SecondBrainLabs-SBL/sbl-mcp/issues/19)).
+- Verified 30 September 2026 on prod with a real Claude connection: authorized read; approved draft message edit on sandbox draft 8578 (still CREATED, 0 sent); cross-company request denied (403); disconnect revokes access.
+- Pre-merge: Lightsail E2E 30/31 (draft edit inconclusive there because of dummy LLM credentials); independent Opus and Codex security reviews; Momentic Mo regression on dev (21 verified; 2 filed items explained as brief/seed artifacts).
+- Not verified: automatic token refresh was observed only through continued use, not a forced-expiry test on prod.
+
 Latest MCP source `783d0fbf03858b80f8142cc30f9f28f589c9af33` was deployed through [Hosted Actions 36660983976](https://github.com/SecondBrainLabs-SBL/sbl-mcp/actions/runs/36660983976). The workflow waited for ECS stability and verified public health at **0.2.10 / 32 tools**. The earlier PR6–10 repair batch remains included.
 
 - Component editing publishes its required arguments and keeps strict branch validation. A hosted authenticated draft edit and readback passed; a stale revision returned a structured conflict without overwriting the draft.
@@ -73,7 +86,6 @@ Reconnect your MCP client to refresh its tool catalog. Desktop users must instal
 - Keyed generation replays the same draft through hosted MCP. Callers must persist and reuse the exact key and brief; old unkeyed draft8581 was not retried. The post-commit failure path remains locally tested only. A separate empty-fixture generation attempt on 30 September returned HTTP500 twice through MCP and once through the public API with the same key; no new draft appeared in the company126 campaign list. The cause remains untriaged, and a different key was not attempted for that brief.
 - Hosted CSV upload/import handoff is verified on one synthetic company126 fixture; broader client compatibility and data shapes remain untested. Complete conversation retrieval remains open. The live one-message thread read passed; this does not close pagination/completeness coverage.
 - The app and MCP sender replacement/removal controls are deployed and live-verified. Moving a lead out of another active campaign still requires the app's existing Merge action.
-- OAuth is being built in separate app/MCP PRs; the released hosted endpoint still uses bearer API keys.
 
 Each subsequent released fix will update this page with its actual outcome. Keep partial, failed and untested workflows distinct from working ones.
 

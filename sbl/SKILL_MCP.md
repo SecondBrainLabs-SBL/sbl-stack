@@ -13,16 +13,18 @@ hide pending state, or broaden the user's scope.
 ## Safety invariants
 
 - Discover the server through the MCP `initialize` handshake followed by
-  `tools/list`. Require exactly 30 unique `sbl_*` tool names with no duplicates
+  `tools/list`. Require at least the 30 original (32 on hosted ≥ 0.2.11) unique `sbl_*` tool names with no duplicates
   and require
   `sbl_list_linkedin_channels`, `sbl_bind_linkedin_channel`,
   `sbl_run_campaign`, `sbl_get_campaign`, and `sbl_end_campaign`. Record the
-  server version when the initialize handshake exposes it and require 0.2.3.
+  server version when the initialize handshake exposes it and require sbl-mcp ≥ 0.2.3.
   Stop on a missing tool, duplicate name, different count, or conflicting
   version. If the host hides handshake metadata, say that the version is
   unverified rather than inventing it.
-- Use `https://mcp.sbl.so/mcp` for remote MCP. Create or revoke the API key at
-  `https://app.secondbrainlabs.com/mcp-server`.
+- Use `https://mcp.sbl.so/mcp` for remote MCP. Preferred: connect with OAuth
+  (add it as a custom connector at that URL, sign in to SBL, pick the company; in
+  Claude Code run `/mcp` → sbl → Authenticate). Alternative: an API key, created
+  or revoked at `https://app.secondbrainlabs.com/mcp-server`.
 - The SBL API key used as the bearer credential is secret. Never ask the user to
   paste it into chat and never print, log, screenshot, persist, save, or repeat
   that bearer credential or its `Authorization` header. If authentication fails,

@@ -1,22 +1,25 @@
 ---
 name: sbl
 description: |
-  Manage sbl.so campaigns through the 30-tool sbl-mcp 0.2.3 surface. Audit,
+  Manage sbl.so campaigns through the sbl-mcp ≥ 0.2.3 surface (30 original tools, 32 on hosted ≥ 0.2.11). Audit,
   create, optimize, triage, review, and run a controlled one-recipient LinkedIn
   launch when the user asks to operate or inspect SBL campaigns.
 ---
 
 You are operating the **SBL Stack** skill. The user expects you to manage their sbl.so campaigns end-to-end. Follow this skill precisely. Do not invent campaign data — only use what the `sbl_*` MCP tools return.
 
-## Prerequisite: sbl-mcp 0.2.3
+## Prerequisite: sbl-mcp ≥ 0.2.3
 
-This skill needs exactly 30 `sbl_*` tools. They can come from the hosted MCP at
+This skill needs sbl-mcp ≥ 0.2.3 with at least the 30 original `sbl_*` tools (32 on hosted ≥ 0.2.11). They can come from the hosted MCP at
 `https://mcp.sbl.so/mcp` or the current Claude Desktop MCP Bundle. If they are not
 available, stop and tell the user:
 
-> Connect sbl-mcp at https://mcp.sbl.so/mcp, or install the latest sbl-mcp MCP
+> Connect sbl-mcp at https://mcp.sbl.so/mcp with OAuth (claude.ai / Desktop:
+> Settings → Connectors → Add custom connector; Claude Code:
+> `claude mcp add --transport http sbl https://mcp.sbl.so/mcp`, then `/mcp` →
+> sbl → Authenticate), or install the latest sbl-mcp MCP
 > Bundle from https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest.
-> Create the API key outside this chat at
+> With an API key instead, create it outside this chat at
 > https://app.secondbrainlabs.com/mcp-server, then reconnect and reopen the chat.
 
 If any `sbl_*` tool returns 401 / Unauthorized at any point, stop and tell the user:

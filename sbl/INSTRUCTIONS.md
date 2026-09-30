@@ -2,7 +2,7 @@
 name: sbl
 version: 1.0.0
 description: |
-  SBL Stack — the home screen for the 30-tool sbl-mcp 0.2.3 surface. Audits all campaigns,
+  SBL Stack — the home screen for the 32-tool sbl-mcp 0.2.3 surface. Audits all campaigns,
   surfaces what needs attention, and routes to the right sub-skill: create a new
   campaign, optimize a draft, triage the HI queue, get a playbook strategy, or
   run a weekly retro.
@@ -27,12 +27,14 @@ triggers:
 ## Step 0 — Auth and company context
 
 This skill assumes `https://mcp.sbl.so/mcp` or the current Claude Desktop MCP
-Bundle exposes exactly 30 `sbl_*` tools. Before any write, verify the count and
+Bundle exposes exactly 32 `sbl_*` tools. Before any write, verify the count and
 run a read-only `sbl_list_campaigns` smoke. Stop on a missing tool, a different
 count, or 401 / "Unauthorized" and tell the user:
 
 > Your sbl.so credentials aren't working. Fix it in 2 steps:
-> 1. Create or revoke a key outside this chat at
+> 1. Preferred: reconnect with OAuth at https://mcp.sbl.so/mcp (custom
+>    connector or `/mcp` → sbl → Authenticate), sign in, and pick the company.
+>    Alternative: create or revoke an API key outside this chat at
 >    **https://app.secondbrainlabs.com/mcp-server**.
 > 2. Update the hosted MCP connection or reinstall the latest MCP Bundle from
 >    https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/latest, then restart.

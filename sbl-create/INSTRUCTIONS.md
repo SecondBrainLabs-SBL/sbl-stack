@@ -44,7 +44,7 @@ If not set, ask: "What is your sbl.so company ID? (Find it in sbl.so → Setting
 
 Store the company_id for all subsequent MCP calls in this session.
 
-Before asking campaign questions or creating a draft, verify that exactly 30
+Before asking campaign questions or creating a draft, verify that exactly 32
 `sbl_*` tools are visible and make `sbl_list_linkedin_channels` the first tool
 call. If no channel is returned, pause and direct the user to
 https://app.secondbrainlabs.com/settings?tab=communication. After they return,
@@ -299,7 +299,7 @@ invent or call a generic campaign patch.
 ```
 Before launching campaign [campaign_id], complete:
 
-[ ] Exactly 30 sbl-mcp 0.2.3 tools visible; read-only campaign smoke passed
+[ ] Exactly 32 sbl-mcp 0.2.3 tools visible; read-only campaign smoke passed
 [ ] Exact sender listed, explicitly chosen, and revision-aware binding verified
 [ ] Exactly one manually approved recipient added; no bulk/import workflow used
 [ ] AI persona trained: sbl.so → Settings → Persona (upload voice sample)

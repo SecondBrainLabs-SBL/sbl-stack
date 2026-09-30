@@ -1,6 +1,6 @@
 # SBL Stack
 
-> Your AI campaign manager for [sbl.so](https://sbl.so) — 30 MCP tools plus the `sbl` and
+> Your AI campaign manager for [sbl.so](https://sbl.so) — 32 MCP tools plus the `sbl` and
 > `high-intent-outreach` prompts for audit, creation, triage, and a
 > controlled one-recipient launch.
 
@@ -99,7 +99,7 @@ claude mcp add --scope user --transport http sbl https://mcp.sbl.so/mcp \
 ```
 
 Keep the literal `${SBL_API_KEY}` reference and set the value in the environment or
-secret manager that starts Claude Code. Restart Claude Code and verify exactly 30
+secret manager that starts Claude Code. Restart Claude Code and verify exactly 32
 `sbl_*` tools. Optionally install the `/sbl` skills:
 
 ```bash
@@ -178,7 +178,9 @@ Reload your terminal (`source ~/.zshrc`) and you're set.
 
 ---
 
-## The tools (30)
+## The tools (32)
+
+The tables below list the 30 original tools; hosted 0.2.11 adds `sbl_archive_campaign` and a LinkedIn sender update tool.
 
 Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 

@@ -180,9 +180,9 @@ Reload your terminal (`source ~/.zshrc`) and you're set.
 
 ---
 
-## The tools (32 listed; hosted 0.3.0 runs 36)
+## The tools (36)
 
-The 30 original tools are listed first. Hosted `mcp.sbl.so` now runs **0.3.0 with 36 tools** — the newest add the generic dashboard-action surface (`sbl_list_actions` / `sbl_describe_action` / `sbl_call_action`) plus related lead-source tools; `GET /health` reports the live version and count. The latest **desktop bundle** is **v0.2.10** (a 0.3.0 desktop bundle has not been cut yet, so an installed extension has fewer tools than hosted).
+All 36 tools on hosted `mcp.sbl.so` (0.3.0) are listed below, grouped by use; `GET /health` reports the live version and count. The newest additions are the generic dashboard-action surface (`sbl_list_actions` / `sbl_describe_action` / `sbl_call_action`), which reach CRM, signals, meme follow-ups and more. The latest **desktop bundle** is **v0.2.10** — a 0.3.0 desktop bundle has not been cut yet, so an installed extension exposes fewer tools than hosted.
 
 Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 
@@ -249,6 +249,14 @@ Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 | `sbl_refine_prompt_lead_session` | Refine those filters (up to 2 refinements) |
 | `sbl_get_prompt_lead_session` | Check the session/export state |
 | `sbl_approve_prompt_lead_sample` | Approve and start the real lead export (billable; default 10, max 100 leads) |
+
+### Workspaces & dashboard actions
+| Tool | What it does |
+|------|--------------|
+| `sbl_list_companies` | List the companies/workspaces this connection can act on, as IDs and names |
+| `sbl_list_actions` | List the dashboard actions callable via `sbl_call_action` (name, tier, description), optionally filtered by domain |
+| `sbl_describe_action` | Show one dashboard action's fields, tier, and the guards it requires |
+| `sbl_call_action` | Call one dashboard action with the confirm / idempotency / revision guards its tier needs — the generic surface covering CRM, signals, meme follow-ups, and more |
 
 > Safety by design: nothing launches, sends, or bills without an explicit approval step — drafts stay drafts until you say go.
 

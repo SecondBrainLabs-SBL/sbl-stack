@@ -1,12 +1,12 @@
 # SBL Stack
 
-> Your AI campaign manager for [sbl.so](https://sbl.so) — 32 MCP tools plus the `sbl` and
+> Your AI campaign manager for [sbl.so](https://sbl.so) — up to 36 MCP tools (hosted 0.3.0) plus the `sbl` and
 > `high-intent-outreach` prompts for audit, creation, triage, and a
 > controlled one-recipient launch.
 
 Built on playbook data from **320,000+ delivered messages across 1,200+ campaigns.**
 
-The public v0.2.6 skill executes campaign creation, launch, replay, and end
+The public `sbl` skill executes campaign creation, launch, replay, and end
 orchestration for LinkedIn only. WhatsApp and iMessage may be discussed as
 unsupported, deferred concepts, but this release does not run their launch
 workflows.
@@ -38,15 +38,17 @@ SBL Stack is split into two pieces. Install both:
 **Step 1 — Install the sbl-mcp extension (tools)**
 
 1. Create your sbl.so API key at [SBL MCP settings](https://app.secondbrainlabs.com/mcp-server). Keep it out of chat, screenshots, logs, and plaintext documentation.
-2. Download [sbl-mcp-0.2.6.mcpb](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/download/v0.2.6/sbl-mcp-0.2.6.mcpb). Older clients can use the byte-identical [sbl-mcp-0.2.6.dxt](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/download/v0.2.6/sbl-mcp-0.2.6.dxt). Checksums and build provenance are on the [release page](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.6).
+2. Download [sbl-mcp-0.2.10.mcpb](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/download/v0.2.10/sbl-mcp-0.2.10.mcpb) (the latest desktop bundle). Older clients can use the byte-identical [sbl-mcp-0.2.10.dxt](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/download/v0.2.10/sbl-mcp-0.2.10.dxt). Checksums and build provenance are on the [release page](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases/tag/v0.2.10). For the full current tool surface without installing, use the hosted server (Option B below).
 3. In Claude Desktop, open **Settings → Extensions → Advanced settings → Install Extension** and select the bundle.
 4. The extension will prompt for two values: your **sbl.so API Key** (required — paste what you copied in step 1) and an optional **API URL** (leave the default `https://api.sbl.so` unless your account is on a non-prod environment). Click Install.
 
-> **No Python, Node, or other user-installed runtime needed.** v0.2.6 exposes
-> exactly 30 tools, including read-only LinkedIn sender discovery and
-> revision-protected sender binding.
+> **No Python, Node, or other user-installed runtime needed.** The v0.2.10
+> desktop bundle exposes the campaign and lead-source tools, including
+> read-only LinkedIn sender discovery and revision-protected sender binding.
+> The hosted server (Option B) carries the current, larger 0.3.0 surface
+> (36 tools); a desktop v0.3.0 bundle has not been cut yet.
 
-Upgrading from an older bundle? Install v0.2.6 through the same Extensions screen, confirm the installed version, and start a new chat. Each user should configure their own SBL API key. A hosted server update does not update a downloaded extension.
+Upgrading from an older bundle? Install v0.2.10 through the same Extensions screen, confirm the installed version, and start a new chat. Each user should configure their own SBL API key. A hosted server update does not update a downloaded extension.
 
 Try: **“List my SBL campaigns. Ask for my company ID if needed; do not change anything.”**
 
@@ -100,7 +102,7 @@ claude mcp add --scope user --transport http sbl https://mcp.sbl.so/mcp \
 
 Keep the literal `${SBL_API_KEY}` reference and set the value in the environment or
 secret manager that starts Claude Code. Restart Claude Code and verify at least the 30 original
-`sbl_*` tools (health reports 0.2.11 / 32 tools on current hosted). Optionally install the `/sbl` skills:
+`sbl_*` tools (health reports 0.3.0 / 36 tools on current hosted). Optionally install the `/sbl` skills:
 
 ```bash
 git clone https://github.com/SecondBrainLabs-SBL/sbl-stack && cd sbl-stack && ./setup
@@ -178,9 +180,9 @@ Reload your terminal (`source ~/.zshrc`) and you're set.
 
 ---
 
-## The tools (32)
+## The tools (32 listed; hosted 0.3.0 runs 36)
 
-The 30 original tools are listed first; the last two rows exist on hosted 0.2.11 (32 tools) only. The Desktop bundle 0.2.6 has 30 tools.
+The 30 original tools are listed first. Hosted `mcp.sbl.so` now runs **0.3.0 with 36 tools** — the newest add the generic dashboard-action surface (`sbl_list_actions` / `sbl_describe_action` / `sbl_call_action`) plus related lead-source tools; `GET /health` reports the live version and count. The latest **desktop bundle** is **v0.2.10** (a 0.3.0 desktop bundle has not been cut yet, so an installed extension has fewer tools than hosted).
 
 Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 
@@ -201,14 +203,14 @@ Everything the sbl-mcp extension gives Claude, grouped by what you'd use it for.
 | `sbl_update_campaign_component` | Edit one draft component: ICP, objective, messages, sequence, or smart follow-ups; message edits can retain the existing channel |
 | `sbl_create_retargeting_campaign` | Spin up a new draft targeting users from an existing campaign (by insight, purchase likelihood, or sentiment) |
 | `sbl_bind_linkedin_channel` | Bind an explicitly chosen sender to a CREATED draft using its current revision; never launches |
-| `sbl_update_linkedin_campaign_senders` | Replace or remove senders on an owned LinkedIn campaign using its current revision; never launches or sends (hosted 0.2.11 only) |
+| `sbl_update_linkedin_campaign_senders` | Replace or remove senders on an owned LinkedIn campaign using its current revision; never launches or sends (hosted 0.3.0) |
 
 ### Campaign lifecycle
 | Tool | What it does |
 |------|--------------|
 | `sbl_run_campaign` | Launch a draft campaign (requires your explicit approval) |
 | `sbl_end_campaign` | End a running campaign |
-| `sbl_archive_campaign` | Archive an owned, already ENDED campaign after confirmation (hosted 0.2.11 only) |
+| `sbl_archive_campaign` | Archive an owned, already ENDED campaign after confirmation (hosted 0.3.0) |
 
 ### Messaging & human intervention
 | Tool | What it does |
@@ -304,7 +306,7 @@ asset if your Claude build requires it) and restart the app.
 ## Stack
 
 - **Skills** — Claude Code markdown skill format
-- **MCP server** — `sbl-mcp` Desktop bundle 0.2.6, with a separately deployed hosted Streamable HTTP service. The current `.mcpb` bundle—and a verified legacy `.dxt` compatibility asset when provided—ships from this repo's [Releases](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases).
+- **MCP server** — `sbl-mcp` Desktop bundle v0.2.10, with a separately deployed hosted Streamable HTTP service (currently 0.3.0 / 36 tools). The current `.mcpb` bundle—and a verified legacy `.dxt` compatibility asset when provided—ships from this repo's [Releases](https://github.com/SecondBrainLabs-SBL/sbl-stack/releases).
 - **API** — sbl.so public API
 
 ---
